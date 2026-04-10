@@ -50,7 +50,7 @@ public class AccountUtils {
 
     public static final String ACCOUNT_EXISTS_MSG = "Account Type For This User Already Exists";
 
-    public static String generateAccountNumber() {
+    public static String generateSavingsAccountNumber() {
 
         // 2026 + randomSixDigits
         Year currentYear = Year.now();
@@ -68,6 +68,30 @@ public class AccountUtils {
         StringBuilder accountNumber = new StringBuilder();
 
         return accountNumber.append(year).append(randomNumber).toString();
+    }
+
+    public static String generateCurrentAccountNumber() {
+        int min = 100000;
+        int max = 999999;
+        int starterNumber = 1032;
+        int randomNumber = (int) Math.floor(Math.random() * (max - min + 1) +min);
+
+        String starter = String.valueOf(starterNumber);
+        String randomNumberString = String.valueOf(randomNumber);
+        StringBuilder accountNumber = new StringBuilder();
+        return accountNumber.append(starter).append(randomNumberString).toString();
+
+    }
+    public static String generateFixedAccountNumber() {
+        int min = 100000;
+        int max = 999999;
+        int starterNumber = 2281;
+        int randomNumber = (int) Math.floor(Math.random() * (max - min + 1) +min);
+
+        String starter = String.valueOf(starterNumber);
+        String randomNumberString = String.valueOf(randomNumber);
+        StringBuilder accountNumber = new StringBuilder();
+        return accountNumber.append(starter).append(randomNumberString).toString();
     }
 }
 

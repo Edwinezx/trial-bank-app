@@ -24,7 +24,8 @@ public class UserServiceImplementation implements UserService {
     EmailService emailService;
 
     @Override
-    public BankResponse createAccount(UserRequest userRequest,  AccountRequest accountRequest) {
+    public BankResponse createAccount(UserRequest userRequest, AccountRequest accountRequest) {
+
         /*
          * Creating an account - saving a new user into the db
          * check if user already has an account created with a particular phone number
@@ -34,11 +35,15 @@ public class UserServiceImplementation implements UserService {
         User savedUser = null;
         Account savedAccount = null;
 
+        AccountType accountType = accountRequest.getAccountType();
+
         //create found user to be used for checking account exists
         User foundUser = userRepository.findByEmail(userRequest.getEmail());
+
         if (foundUser != null) {
+
             boolean accountExists = accountRepository
-                    .existsByUserAndAccountType(foundUser, accountRequest.getAccountType());
+                    .existsByUserAndAccountType(foundUser, accountType);
 
             if (accountExists) {
                 return BankResponse.builder()
@@ -50,15 +55,31 @@ public class UserServiceImplementation implements UserService {
 
             savedUser = foundUser;
 
-            Account newAccount = Account.builder()
-                    .accountNumber(AccountUtils.generateAccountNumber())
+            String accountNumber;
+
+            switch (accountType) {
+                case SAVINGS:
+                    accountNumber = AccountUtils.generateSavingsAccountNumber();
+                    break;
+                case CURRENT:
+                    accountNumber = AccountUtils.generateCurrentAccountNumber();
+                    break;
+                case FIXED:
+                    accountNumber = AccountUtils.generateFixedAccountNumber();
+                    break;
+                default:
+                    throw new IllegalArgumentException("Invalid account type");
+            }
+
+            Account account = Account.builder()
+                    .accountNumber(accountNumber)
                     .accountBalance(BigDecimal.ZERO)
-                    .accountType(accountRequest.getAccountType())
+                    .accountType(accountType)
                     .status("ACTIVE")
                     .user(foundUser)
                     .build();
 
-            savedAccount = accountRepository.save(newAccount);
+            savedAccount = accountRepository.save(account);
         }
 
         // TODO
@@ -67,6 +88,7 @@ public class UserServiceImplementation implements UserService {
         // 3. Create account for that user if not
 
         if (foundUser == null) {
+
             User newUser = User.builder()
                     .firstName(userRequest.getFirstName())
                     .lastName(userRequest.getLastName())
@@ -80,49 +102,75 @@ public class UserServiceImplementation implements UserService {
                     .build();
 
             savedUser = userRepository.save(newUser);
-            //if (accountRequest.getAccountType() == AccountType.CURRENT){
 
-            Account newAccount = Account.builder()
-                    .accountNumber(AccountUtils.generateAccountNumber())
-                    .accountBalance(BigDecimal.ZERO)
-                    .accountType(accountRequest.getAccountType())
-                    .status("ACTIVE")
-                    .user(savedUser)
-                    .build();
-
-            savedAccount = accountRepository.save(newAccount);
-        }
-
-            //send email alert
-
-            if (savedUser.getEmail() != null && !savedUser.getEmail().isBlank()) {
-                EmailDetails emailDetails = EmailDetails.builder()
-                        .recipientEmail(savedUser.getEmail())
-                        .messageBody(
-                                "Your Account Has Been Successfully Created. \nYour Account Details: \n" +
-                                        "Account name: " + savedUser.getLastName() + " " + savedUser.getFirstName() + " " + savedUser.getOtherName() +
-                                        "\nAccount Type: " + savedAccount.getAccountType() +
-                                        "\nAccount Number: " + savedAccount.getAccountNumber() +
-                                        "\nAccount Balance: ₦" + savedAccount.getAccountBalance()
-                        )
-                        .Subject("ACCOUNT CREATION")
+            if (accountType.isSavingsAccount()) {
+                Account newAccount = Account.builder()
+                        .accountNumber(AccountUtils.generateSavingsAccountNumber())
+                        .accountBalance(BigDecimal.ZERO)
+                        .accountType(accountType)
+                        .status("ACTIVE")
+                        .user(savedUser)
                         .build();
 
-                emailService.sendEmailAlert(emailDetails);
-            } else {
-                System.out.println("Warning: User email is null or empty. Skipping email alert.");
+                savedAccount = accountRepository.save(newAccount);
             }
-            // Return response
-            return BankResponse.builder()
-                    .responseCode(AccountUtils.ACCOUNT_CREATION_SUCCESS)
-                    .responseMessage(AccountUtils.ACCOUNT_CREATION_MSG)
-                    .accountInfo(AccountInfo.builder()
-                            .accountBalance(savedAccount.getAccountBalance())
-                            .accountNumber(savedAccount.getAccountNumber())
-                            .accountName(savedUser.getFirstName() + " " + savedUser.getLastName() + " " + savedUser.getOtherName())
-                            .build())
+
+            if (accountType.isCurrentAccount()) {
+                Account newAccount = Account.builder()
+                        .accountNumber(AccountUtils.generateCurrentAccountNumber())
+                        .accountBalance(BigDecimal.ZERO)
+                        .accountType(accountType)
+                        .status("ACTIVE")
+                        .user(savedUser)
+                        .build();
+
+                savedAccount = accountRepository.save(newAccount);
+            }
+
+            if (accountType.isFixedAccount()) {
+                Account newAccount = Account.builder()
+                        .accountNumber(AccountUtils.generateFixedAccountNumber())
+                        .accountBalance(BigDecimal.ZERO)
+                        .accountType(accountType)
+                        .status("ACTIVE")
+                        .user(savedUser)
+                        .build();
+
+                savedAccount = accountRepository.save(newAccount);
+            }
+        }
+
+        //send email alert
+        if (savedUser.getEmail() != null && !savedUser.getEmail().isBlank()) {
+
+            EmailDetails emailDetails = EmailDetails.builder()
+                    .recipientEmail(savedUser.getEmail())
+                    .messageBody(
+                            "Your Account Has Been Successfully Created. \nYour Account Details: \n" +
+                                    "Account name: " + savedUser.getLastName() + " " + savedUser.getFirstName() + " " + savedUser.getOtherName() +
+                                    "\nAccount Type: " + savedAccount.getAccountType() +
+                                    "\nAccount Number: " + savedAccount.getAccountNumber() +
+                                    "\nAccount Balance: ₦" + savedAccount.getAccountBalance()
+                    )
+                    .Subject("ACCOUNT CREATION")
                     .build();
 
+            emailService.sendEmailAlert(emailDetails);
+
+        } else {
+            System.out.println("Warning: User email is null or empty. Skipping email alert.");
+        }
+
+        // Return response
+        return BankResponse.builder()
+                .responseCode(AccountUtils.ACCOUNT_CREATION_SUCCESS)
+                .responseMessage(AccountUtils.ACCOUNT_CREATION_MSG)
+                .accountInfo(AccountInfo.builder()
+                        .accountBalance(savedAccount.getAccountBalance())
+                        .accountNumber(savedAccount.getAccountNumber())
+                        .accountName(savedUser.getFirstName() + " " + savedUser.getLastName() + " " + savedUser.getOtherName())
+                        .build())
+                .build();
     }
 
         //Balance Enquiry, Name Enquiry, Debit, Credit, Transfer
