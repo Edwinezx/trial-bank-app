@@ -43,4 +43,9 @@ public class UserController {
     public BankResponse transferAccount(@RequestBody TransferRequest request){
         return userService.TransferMoney(request);
     }
+
+    @PostMapping("/login")
+    public BankResponse login(@RequestBody LoginRequest loginRequest){
+        return userService.appLogin(loginRequest);
+    }
 }

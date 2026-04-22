@@ -50,6 +50,18 @@ public class AccountUtils {
 
     public static final String ACCOUNT_EXISTS_MSG = "Account Type For This User Already Exists";
 
+    public static final String USER_NOT_FOUND_CODE = "012";
+
+    public static final String USER_NOT_FOUND_MSG = "User Not Found";
+
+    public static final String LOGIN_SUCCESS_CODE= "013";
+
+    public static final String LOGIN_SUCCESS_MSG = "Login Successful";
+
+    public static final String LOGIN_FAILURE_CODE= "014";
+
+    public static final String LOGIN_FAILURE_MSG = "Login Failed, Incorrect Password";
+
     public static String generateSavingsAccountNumber() {
 
         // 2026 + randomSixDigits

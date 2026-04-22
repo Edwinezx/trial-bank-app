@@ -7,6 +7,7 @@ import com.edwin.trial_bank_app.repository.accountRepository;
 import com.edwin.trial_bank_app.repository.userRepository;
 import com.edwin.trial_bank_app.utils.AccountUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -19,6 +20,9 @@ public class UserServiceImplementation implements UserService {
 
     @Autowired
     accountRepository accountRepository;
+
+    @Autowired
+    PasswordEncoder passwordEncoder;
 
     @Autowired
     EmailService emailService;
@@ -86,7 +90,7 @@ public class UserServiceImplementation implements UserService {
         // 1. Check if the type is either current, savings or fixed
         // 2. Check if the user has that particular account
         // 3. Create account for that user if not
-
+        String encodedPassword = passwordEncoder.encode(userRequest.getPassword());
         if (foundUser == null) {
 
             User newUser = User.builder()
@@ -99,6 +103,7 @@ public class UserServiceImplementation implements UserService {
                     .email(userRequest.getEmail())
                     .phoneNumber(userRequest.getPhoneNumber())
                     .alternativePhoneNumber(userRequest.getAlternativePhoneNumber())
+                    .password(encodedPassword)
                     .build();
 
             savedUser = userRepository.save(newUser);
@@ -209,6 +214,42 @@ public class UserServiceImplementation implements UserService {
         return foundUser.getLastName()  + " " + foundUser.getFirstName() + " " + foundUser.getOtherName();
     }
 
+    //Login test
+    @Override
+    public BankResponse appLogin(LoginRequest loginRequest) {
+        //check if account exists
+        boolean doesUserExist = userRepository.existsByEmail(loginRequest.getUsername());
+        if (!doesUserExist) {
+            return BankResponse.builder()
+                    .responseCode(AccountUtils.USER_NOT_FOUND_CODE)
+                    .responseMessage(AccountUtils.USER_NOT_FOUND_MSG)
+                    .accountInfo(null)
+                    .build();
+        }
+        User foundUser = userRepository.findByEmail(loginRequest.getUsername());
+        Account userAccount = accountRepository.findByUser(foundUser);
+
+        if (passwordEncoder.matches(loginRequest.getPassword(), foundUser.getPassword())) {
+            // success
+            return BankResponse.builder()
+                    .responseCode(AccountUtils.LOGIN_SUCCESS_CODE)
+                    .responseMessage(AccountUtils.LOGIN_SUCCESS_MSG)
+                    .accountInfo(AccountInfo.builder()
+                            .accountName(foundUser.getLastName() + " " + foundUser.getFirstName() + " " + foundUser.getOtherName())
+                            .accountNumber(userAccount.getAccountNumber())
+                            .accountBalance(userAccount.getAccountBalance())
+                            .build())
+                    .build();
+        } else {
+            // invalid password
+            return BankResponse.builder()
+                    .responseCode(AccountUtils.LOGIN_FAILURE_CODE)
+                    .responseMessage(AccountUtils.LOGIN_FAILURE_MSG)
+                    .accountInfo(null)
+                    .build();
+        }
+    }
+    // Crediting an account
     @Override
     public BankResponse creditAccount(CreditDebitRequest request) {
         //check if account exists
@@ -238,6 +279,7 @@ public class UserServiceImplementation implements UserService {
                 .build();
     }
 
+    // Debiting an account
     @Override
     public BankResponse DebitAccount(CreditDebitRequest request) {
         //check if account exists
@@ -279,14 +321,11 @@ public class UserServiceImplementation implements UserService {
                         .build())
                 .build();
     }
-
+    // transferring between accounts
     @Override
     public BankResponse TransferMoney(TransferRequest request) {
         // get the account to debit(check if it exists)
-        //check if account has sufficient money
-        //debit the account
-        //get the account to be credited
-        //Credit the account
+
 
         boolean isSourceAccountExist = accountRepository.existsByAccountNumber(request.getSourceAccountNumber());
         boolean isDestinationAccountExist = accountRepository.existsByAccountNumber(request.getDestinationAccountNumber());
@@ -310,6 +349,7 @@ public class UserServiceImplementation implements UserService {
         BigDecimal amount = request.getAmount();
         BigDecimal balance = sourceAccount.getAccountBalance();
 
+        //check if account has sufficient money
         if (amount.compareTo(balance) > 0) {
             return BankResponse.builder()
                     .responseCode(AccountUtils.INSUFFICIENT_FUNDS_CODE)
@@ -318,9 +358,12 @@ public class UserServiceImplementation implements UserService {
                     .build();
 
         }
+        //debit the account
         sourceAccount.setAccountBalance(sourceAccount.getAccountBalance().subtract(amount));
         userRepository.save(sourceAccountUser);
 
+        //get the account to be credited
+        //Credit the account
         Account destinationAccount = accountRepository.findByAccountNumber(request.getDestinationAccountNumber());
         User  destinationAccountUser = destinationAccount.getUser();
         destinationAccount.setAccountBalance(destinationAccount.getAccountBalance().add(amount));
@@ -349,6 +392,8 @@ public class UserServiceImplementation implements UserService {
                         .accountNumber(sourceAccount.getAccountNumber())
                         .build())
                 .build();
+
+
 
     }
 }
