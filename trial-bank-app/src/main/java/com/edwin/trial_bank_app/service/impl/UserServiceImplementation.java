@@ -59,21 +59,11 @@ public class UserServiceImplementation implements UserService {
 
             savedUser = foundUser;
 
-            String accountNumber;
-
-            switch (accountType) {
-                case SAVINGS:
-                    accountNumber = AccountUtils.generateSavingsAccountNumber();
-                    break;
-                case CURRENT:
-                    accountNumber = AccountUtils.generateCurrentAccountNumber();
-                    break;
-                case FIXED:
-                    accountNumber = AccountUtils.generateFixedAccountNumber();
-                    break;
-                default:
-                    throw new IllegalArgumentException("Invalid account type");
-            }
+            String accountNumber = switch (accountType) {
+                case SAVINGS -> AccountUtils.generateSavingsAccountNumber();
+                case CURRENT -> AccountUtils.generateCurrentAccountNumber();
+                case FIXED -> AccountUtils.generateFixedAccountNumber();
+            };
 
             Account account = Account.builder()
                     .accountNumber(accountNumber)
@@ -148,6 +138,7 @@ public class UserServiceImplementation implements UserService {
         //send email alert
         if (savedUser.getEmail() != null && !savedUser.getEmail().isBlank()) {
 
+            assert savedAccount != null;
             EmailDetails emailDetails = EmailDetails.builder()
                     .recipientEmail(savedUser.getEmail())
                     .messageBody(
@@ -167,6 +158,7 @@ public class UserServiceImplementation implements UserService {
         }
 
         // Return response
+        assert savedAccount != null;
         return BankResponse.builder()
                 .responseCode(AccountUtils.ACCOUNT_CREATION_SUCCESS)
                 .responseMessage(AccountUtils.ACCOUNT_CREATION_MSG)

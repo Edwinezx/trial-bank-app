@@ -33,7 +33,7 @@ public class EmailServiceImpl implements EmailService {
             System.out.println("Email sent successfully");
         }
         catch (MailException e) {
-            System.out.println("Email Sending Failed" + e.getMessage());;
+            System.out.println("Email Sending Failed" + e.getMessage());
         }
     }
 

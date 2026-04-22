@@ -1,6 +1,5 @@
 package com.edwin.trial_bank_app.entity;
 
-import com.edwin.trial_bank_app.dto.AccountType;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
