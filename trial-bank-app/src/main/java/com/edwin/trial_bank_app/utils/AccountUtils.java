@@ -2,6 +2,7 @@ package com.edwin.trial_bank_app.utils;
 
 
 import java.time.Year;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class AccountUtils {
 
@@ -61,48 +62,22 @@ public class AccountUtils {
 
     public static final String LOGIN_FAILURE_MSG = "Login Failed, Incorrect Password";
 
+    private static String generateAccountNumber(String prefix, int min, int max) {
+        int randomNumber = ThreadLocalRandom.current().nextInt(min, max + 1);
+        return prefix + randomNumber;
+    }
+
     public static String generateSavingsAccountNumber() {
-
-        // 2026 + randomSixDigits
-        Year currentYear = Year.now();
-        int min = 100000;
-        int max = 999999;
-
-        //generate a random number between min and max
-        int randNumber = (int) Math.floor(Math.random() * (max - min + 1) +min);
-
-        //convert the current year and random number into strings and concatenate them
-
-        String year = String.valueOf(currentYear);
-        String randomNumber = String.valueOf(randNumber);
-
-        StringBuilder accountNumber = new StringBuilder();
-
-        return accountNumber.append(year).append(randomNumber).toString();
+        String year = String.valueOf(Year.now().getValue());
+        return generateAccountNumber(year, 100000, 999999);
     }
 
     public static String generateCurrentAccountNumber() {
-        int min = 100000;
-        int max = 999999;
-        int starterNumber = 1032;
-        int randomNumber = (int) Math.floor(Math.random() * (max - min + 1) +min);
-
-        String starter = String.valueOf(starterNumber);
-        String randomNumberString = String.valueOf(randomNumber);
-        StringBuilder accountNumber = new StringBuilder();
-        return accountNumber.append(starter).append(randomNumberString).toString();
-
+        return generateAccountNumber("1032", 100000, 999999);
     }
-    public static String generateFixedAccountNumber() {
-        int min = 100000;
-        int max = 999999;
-        int starterNumber = 2281;
-        int randomNumber = (int) Math.floor(Math.random() * (max - min + 1) +min);
 
-        String starter = String.valueOf(starterNumber);
-        String randomNumberString = String.valueOf(randomNumber);
-        StringBuilder accountNumber = new StringBuilder();
-        return accountNumber.append(starter).append(randomNumberString).toString();
+    public static String generateFixedAccountNumber() {
+        return generateAccountNumber("2281", 100000, 999999);
     }
 }
 
