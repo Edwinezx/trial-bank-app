@@ -14,7 +14,7 @@ public class UserController {
     @Autowired
     UserService userService;
 
-    @PostMapping("/register")
+    //@PostMapping("/register")
     public BankResponse createAccount(@RequestBody CreateAccountRequest request) {
         return  userService.createAccount(request.getUserRequest());
     }
