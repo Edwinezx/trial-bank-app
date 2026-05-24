@@ -3,6 +3,8 @@ package com.edwin.trial_bank_app.service.impl;
 import com.edwin.trial_bank_app.dto.*;
 import com.edwin.trial_bank_app.entity.Account;
 import com.edwin.trial_bank_app.entity.User;
+import com.edwin.trial_bank_app.enums.AccountStatus;
+import com.edwin.trial_bank_app.enums.AccountType;
 import com.edwin.trial_bank_app.repository.accountRepository;
 import com.edwin.trial_bank_app.repository.userRepository;
 import com.edwin.trial_bank_app.utils.AccountUtils;
@@ -69,7 +71,7 @@ public class UserServiceImplementation implements UserService {
                     .accountNumber(accountNumber)
                     .accountBalance(BigDecimal.ZERO)
                     .accountType(accountType)
-                    .status("ACTIVE")
+                    .status(AccountStatus.valueOf("ACTIVE"))
                     .user(foundUser)
                     .build();
 
@@ -105,7 +107,7 @@ public class UserServiceImplementation implements UserService {
                         .accountNumber(AccountUtils.generateSavingsAccountNumber())
                         .accountBalance(BigDecimal.ZERO)
                         .accountType(accountType)
-                        .status("ACTIVE")
+                        .status(AccountStatus.valueOf("ACTIVE"))
                         .user(savedUser)
                         .build();
 
@@ -117,7 +119,7 @@ public class UserServiceImplementation implements UserService {
                         .accountNumber(AccountUtils.generateCurrentAccountNumber())
                         .accountBalance(BigDecimal.ZERO)
                         .accountType(accountType)
-                        .status("ACTIVE")
+                        .status(AccountStatus.valueOf("ACTIVE"))
                         .user(savedUser)
                         .build();
 
@@ -129,7 +131,7 @@ public class UserServiceImplementation implements UserService {
                         .accountNumber(AccountUtils.generateFixedAccountNumber())
                         .accountBalance(BigDecimal.ZERO)
                         .accountType(accountType)
-                        .status("ACTIVE")
+                        .status(AccountStatus.valueOf("ACTIVE"))
                         .user(savedUser)
                         .build();
 
@@ -275,7 +277,7 @@ public class UserServiceImplementation implements UserService {
 
     // Debiting an account
     @Override
-    public BankResponse DebitAccount(CreditDebitRequest request) {
+    public BankResponse debitAccount(CreditDebitRequest request) {
         //check if account exists
         boolean doesAccountExist = accountRepository.existsByAccountNumber(request.getAccountNumber());
         if (!doesAccountExist) {
@@ -315,9 +317,38 @@ public class UserServiceImplementation implements UserService {
                         .build())
                 .build();
     }
+
+    @Override
+    public BankResponse closeAccount(CloseAccountRequest request) {
+        Account foundAccount = accountRepository.findByAccountNumber(request.getAccountNumber());
+
+        if (foundAccount == null) {
+            return BankResponse.builder()
+                    .responseCode(AccountUtils.ACCOUNT_DOES_NOT_EXIST)
+                    .responseMessage(AccountUtils.ACCOUNT_DOES_NOT_EXIST_MSG)
+                    .accountInfo(null)
+                    .build();
+        }
+
+        foundAccount.setStatus(AccountStatus.valueOf("CLOSED"));
+        accountRepository.save(foundAccount);
+
+
+        return BankResponse.builder()
+                .responseCode(AccountUtils.ACCOUNT_CLOSURE_SUCCESS_CODE)
+                .responseMessage(AccountUtils.ACCOUNT_CLOSURE_SUCCESS_MSG)
+                .accountInfo(AccountInfo.builder()
+                        .accountNumber(foundAccount.getAccountNumber())
+                        .accountName(foundAccount.getUser().getFirstName() + " " + foundAccount.getUser().getLastName())
+                        .accountBalance(foundAccount.getAccountBalance())
+                        .build())
+                .build();
+    }
+
+
     // transferring between accounts
     @Override
-    public BankResponse TransferMoney(TransferRequest request){
+    public BankResponse transferMoney(TransferRequest request){
             // get the account to debit(check if it exists)
 
 
@@ -338,56 +369,66 @@ public class UserServiceImplementation implements UserService {
                         .build();
             }
 
+
             Account sourceAccount = accountRepository.findByAccountNumber(request.getSourceAccountNumber());
             User sourceAccountUser = sourceAccount.getUser();
-            BigDecimal amount = request.getAmount();
-            BigDecimal balance = sourceAccount.getAccountBalance();
+            if (sourceAccount.getStatus() != AccountStatus.ACTIVE) {
+            return BankResponse.builder()
+                    .responseCode(AccountUtils.ACCOUNT_INACTIVE_CODE)
+                    .responseMessage("Source account is closed or inactive")
+                    .accountInfo(null)
+                    .build();
+        }
+            else {
+                BigDecimal amount = request.getAmount();
+                BigDecimal balance = sourceAccount.getAccountBalance();
 
-            //check if account has sufficient money
-            if (amount.compareTo(balance) > 0) {
+                //check if account has sufficient money
+                if (amount.compareTo(balance) > 0) {
+                    return BankResponse.builder()
+                            .responseCode(AccountUtils.INSUFFICIENT_FUNDS_CODE)
+                            .responseMessage(AccountUtils.INSUFFICIENT_FUNDS_MSG)
+                            .accountInfo(null)
+                            .build();
+
+                }
+                //debit the account
+                sourceAccount.setAccountBalance(sourceAccount.getAccountBalance().subtract(amount));
+                userRepository.save(sourceAccountUser);
+
+                //get the account to be credited
+                //Credit the account
+                Account destinationAccount = accountRepository.findByAccountNumber(request.getDestinationAccountNumber());
+                User destinationAccountUser = destinationAccount.getUser();
+                destinationAccount.setAccountBalance(destinationAccount.getAccountBalance().add(amount));
+                userRepository.save(destinationAccountUser);
+
+                EmailDetails debitAlert = EmailDetails.builder()
+                        .Subject("Debit Alert")
+                        .recipientEmail(sourceAccountUser.getEmail())
+                        .messageBody("Dear esteemed customer, the sum of ₦" + amount + " has been deducted from your account with account number " + sourceAccount.getAccountNumber() + ". Your current balance is ₦" + sourceAccount.getAccountBalance())
+                        .build();
+                emailService.sendEmailAlert(debitAlert);
+
+                EmailDetails creditAlert = EmailDetails.builder()
+                        .Subject("Credit Alert")
+                        .recipientEmail(destinationAccountUser.getEmail())
+                        .messageBody("Dear user, the sum of ₦" + amount + " has been added to your account with account number " + destinationAccount.getAccountNumber() + ". Your current balance is ₦" + destinationAccount.getAccountBalance())
+                        .build();
+                emailService.sendEmailAlert(creditAlert);
+
                 return BankResponse.builder()
-                        .responseCode(AccountUtils.INSUFFICIENT_FUNDS_CODE)
-                        .responseMessage(AccountUtils.INSUFFICIENT_FUNDS_MSG)
-                        .accountInfo(null)
+                        .responseCode(AccountUtils.TRANSFER_SUCCESS_CODE)
+                        .responseMessage(AccountUtils.TRANSFER_SUCCESS_MSG)
+                        .accountInfo(AccountInfo.builder()
+                                .accountName(sourceAccountUser.getLastName() + " " + sourceAccountUser.getFirstName() + " " + sourceAccountUser.getOtherName())
+                                .accountBalance(sourceAccount.getAccountBalance())
+                                .accountNumber(sourceAccount.getAccountNumber())
+                                .build())
                         .build();
 
+
             }
-            //debit the account
-            sourceAccount.setAccountBalance(sourceAccount.getAccountBalance().subtract(amount));
-            userRepository.save(sourceAccountUser);
-
-            //get the account to be credited
-            //Credit the account
-            Account destinationAccount = accountRepository.findByAccountNumber(request.getDestinationAccountNumber());
-            User destinationAccountUser = destinationAccount.getUser();
-            destinationAccount.setAccountBalance(destinationAccount.getAccountBalance().add(amount));
-            userRepository.save(destinationAccountUser);
-
-            EmailDetails debitAlert = EmailDetails.builder()
-                    .Subject("Debit Alert")
-                    .recipientEmail(sourceAccountUser.getEmail())
-                    .messageBody("Dear esteemed customer, the sum of ₦" + amount + " has been deducted from your account with account number " + sourceAccount.getAccountNumber() + ". Your current balance is ₦" + sourceAccount.getAccountBalance())
-                    .build();
-            emailService.sendEmailAlert(debitAlert);
-
-            EmailDetails creditAlert = EmailDetails.builder()
-                    .Subject("Credit Alert")
-                    .recipientEmail(destinationAccountUser.getEmail())
-                    .messageBody("Dear user, the sum of ₦" + amount + " has been added to your account with account number " + destinationAccount.getAccountNumber() + ". Your current balance is ₦" + destinationAccount.getAccountBalance())
-                    .build();
-            emailService.sendEmailAlert(creditAlert);
-
-            return BankResponse.builder()
-                    .responseCode(AccountUtils.TRANSFER_SUCCESS_CODE)
-                    .responseMessage(AccountUtils.TRANSFER_SUCCESS_MSG)
-                    .accountInfo(AccountInfo.builder()
-                            .accountName(sourceAccountUser.getLastName() + " " + sourceAccountUser.getFirstName() + " " + sourceAccountUser.getOtherName())
-                            .accountBalance(sourceAccount.getAccountBalance())
-                            .accountNumber(sourceAccount.getAccountNumber())
-                            .build())
-                    .build();
-
-
         }
     }
 

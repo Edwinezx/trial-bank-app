@@ -7,7 +7,6 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/user")
-
 public class UserController {
      private final UserService userService;
 
@@ -37,12 +36,17 @@ public class UserController {
 
     @PostMapping("/debit")
     public BankResponse debitAccount(@RequestBody CreditDebitRequest request){
-        return userService.DebitAccount(request);
+        return userService.debitAccount(request);
     }
 
     @PostMapping("/transfer")
     public BankResponse transferAccount(@RequestBody TransferRequest request){
-        return userService.TransferMoney(request);
+        return userService.transferMoney(request);
+    }
+
+    @PostMapping("/close")
+    public BankResponse closeAccount(@RequestBody CloseAccountRequest request){
+         return userService.closeAccount(request);
     }
 
     @PostMapping("/login")

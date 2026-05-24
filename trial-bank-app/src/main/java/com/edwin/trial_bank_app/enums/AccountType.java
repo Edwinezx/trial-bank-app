@@ -1,4 +1,4 @@
-package com.edwin.trial_bank_app.dto;
+package com.edwin.trial_bank_app.enums;
 
 public enum AccountType {
     SAVINGS,

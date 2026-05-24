@@ -11,6 +11,7 @@ public interface UserService {
     BankResponse appLogin(LoginRequest loginRequest);
 
     BankResponse creditAccount(CreditDebitRequest request);
-    BankResponse DebitAccount(CreditDebitRequest request);
-    BankResponse TransferMoney(TransferRequest request);
+    BankResponse debitAccount(CreditDebitRequest request);
+    BankResponse transferMoney(TransferRequest request);
+    BankResponse closeAccount(CloseAccountRequest request);
 }

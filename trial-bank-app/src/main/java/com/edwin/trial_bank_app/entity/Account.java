@@ -1,12 +1,14 @@
 package com.edwin.trial_bank_app.entity;
 
-import com.edwin.trial_bank_app.dto.AccountType;
+import com.edwin.trial_bank_app.enums.AccountStatus;
+import com.edwin.trial_bank_app.enums.AccountType;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
 import java.util.Objects;
 
+@SuppressWarnings("JpaDataSourceORMInspection")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -40,7 +42,11 @@ public class Account {
 
     @Enumerated(EnumType.STRING)
     private AccountType accountType;
-    private String status;
+
+    @Enumerated(EnumType.STRING)
+    @Column(length = 25)
+    private AccountStatus status;
+
 
     @ManyToOne
     @JoinColumn(name = "user_id")

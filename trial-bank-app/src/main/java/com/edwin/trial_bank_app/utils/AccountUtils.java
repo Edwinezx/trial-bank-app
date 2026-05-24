@@ -62,6 +62,13 @@ public class AccountUtils {
 
     public static final String LOGIN_FAILURE_MSG = "Login Failed, Incorrect Password";
 
+    public static final String ACCOUNT_CLOSURE_SUCCESS_CODE = "015";
+
+    public static final String ACCOUNT_CLOSURE_SUCCESS_MSG = "Account Closed Successfully";
+
+    public static final String ACCOUNT_INACTIVE_CODE = "016";
+
+
     private static String generateAccountNumber(String prefix, int min, int max) {
         int randomNumber = ThreadLocalRandom.current().nextInt(min, max + 1);
         return prefix + randomNumber;
