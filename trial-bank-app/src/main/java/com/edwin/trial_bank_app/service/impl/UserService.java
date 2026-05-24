@@ -4,7 +4,7 @@ import com.edwin.trial_bank_app.dto.*;
 
 
 public interface UserService {
-    BankResponse createAccount(UserRequest userRequest, AccountRequest accountRequest);
+    BankResponse createAccount(UserRequest userRequest);
     BankResponse balanceEnquiry(EnquiryRequest request);
     String nameEnquiry(EnquiryRequest request);
 

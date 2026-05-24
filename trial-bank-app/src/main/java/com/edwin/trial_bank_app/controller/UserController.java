@@ -16,7 +16,7 @@ public class UserController {
 
     @PostMapping("/register")
     public BankResponse createAccount(@RequestBody CreateAccountRequest request) {
-        return  userService.createAccount(request.getUserRequest(),  request.getAccountRequest());
+        return  userService.createAccount(request.getUserRequest());
     }
 
     @GetMapping("/balanceEnquiry")

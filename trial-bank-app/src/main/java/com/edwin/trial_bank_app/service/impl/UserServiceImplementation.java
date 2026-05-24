@@ -28,7 +28,7 @@ public class UserServiceImplementation implements UserService {
     EmailService emailService;
 
     @Override
-    public BankResponse createAccount(UserRequest userRequest, AccountRequest accountRequest) {
+    public BankResponse createAccount(UserRequest userRequest) {
 
         /*
          * Creating an account - saving a new user into the db
@@ -39,7 +39,7 @@ public class UserServiceImplementation implements UserService {
         User savedUser = null;
         Account savedAccount = null;
 
-        AccountType accountType = accountRequest.getAccountType();
+        AccountType accountType = userRequest.getAccountType();
 
         //create found user to be used for checking account exists
         User foundUser = userRepository.findByEmail(userRequest.getEmail());

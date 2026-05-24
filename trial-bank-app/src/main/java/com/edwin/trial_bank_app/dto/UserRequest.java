@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
+
 @Data
 @Builder
 @AllArgsConstructor
@@ -20,6 +22,9 @@ public class UserRequest{
     private String phoneNumber;
     private String alternativePhoneNumber;
     private String password;
+    private String accountNumber;
+    private BigDecimal accountBalance;
+    private AccountType accountType;
 
 
 }
