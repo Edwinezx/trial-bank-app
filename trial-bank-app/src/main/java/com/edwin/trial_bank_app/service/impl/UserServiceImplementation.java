@@ -413,7 +413,7 @@ public class UserServiceImplementation implements UserService {
                 EmailDetails creditAlert = EmailDetails.builder()
                         .Subject("Credit Alert")
                         .recipientEmail(destinationAccountUser.getEmail())
-                        .messageBody("Dear user, the sum of ₦" + amount + " has been added to your account with account number " + destinationAccount.getAccountNumber() + ". Your current balance is ₦" + destinationAccount.getAccountBalance())
+                        .messageBody("Dear esteemed customer, the sum of ₦" + amount + " has been added to your account with account number " + destinationAccount.getAccountNumber() + ". Your current balance is ₦" + destinationAccount.getAccountBalance())
                         .build();
                 emailService.sendEmailAlert(creditAlert);
 
