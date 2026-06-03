@@ -14,7 +14,7 @@ public class AuthenticationController {
     }
 
     @PostMapping("/login")
-    public MultiAccountBankResponse appLogin(@RequestBody LoginRequest loginRequest) {
+    public AuthResponse appLogin(@RequestBody LoginRequest loginRequest) {
         return authenticationService.appLogin(loginRequest);
     }
 }

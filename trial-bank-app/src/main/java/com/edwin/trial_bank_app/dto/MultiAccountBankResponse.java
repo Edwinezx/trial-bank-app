@@ -12,7 +12,6 @@ public class MultiAccountBankResponse {
     private String responseCode;
     private String responseMessage;
     private List<AccountInfo> accountInfo; // multiple account
-    private String token;
 }
 
 

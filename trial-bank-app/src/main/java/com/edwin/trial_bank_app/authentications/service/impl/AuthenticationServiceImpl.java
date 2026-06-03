@@ -2,6 +2,7 @@ package com.edwin.trial_bank_app.authentications.service.impl;
 
 import com.edwin.trial_bank_app.authentications.service.AuthenticationService;
 import com.edwin.trial_bank_app.dto.AccountInfo;
+import com.edwin.trial_bank_app.dto.AuthResponse;
 import com.edwin.trial_bank_app.dto.LoginRequest;
 import com.edwin.trial_bank_app.dto.MultiAccountBankResponse;
 import com.edwin.trial_bank_app.entity.Account;
@@ -31,10 +32,10 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     @Override
-    public MultiAccountBankResponse appLogin(LoginRequest loginRequest) {
+    public AuthResponse appLogin(LoginRequest loginRequest) {
         boolean doesUserExist = userRepository.existsByEmail(loginRequest.getUsername());
         if (!doesUserExist) {
-            return MultiAccountBankResponse.builder()
+            return AuthResponse.builder()
                     .responseCode(AccountUtils.USER_NOT_FOUND_CODE)
                     .responseMessage(AccountUtils.USER_NOT_FOUND_MSG)
                     .accountInfo(null)
@@ -57,7 +58,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
             String token = JwtUtils.generateToken(foundUser.getEmail());
 
-            return MultiAccountBankResponse.builder()
+            return AuthResponse.builder()
                     .responseCode(AccountUtils.LOGIN_SUCCESS_CODE)
                     .responseMessage(AccountUtils.LOGIN_SUCCESS_MSG)
                     .token(token)
@@ -65,7 +66,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                     .build();
 
         } else {
-            return MultiAccountBankResponse.builder()
+            return AuthResponse.builder()
                     .responseCode(AccountUtils.LOGIN_FAILURE_CODE)
                     .responseMessage(AccountUtils.LOGIN_FAILURE_MSG)
                     .accountInfo(null)

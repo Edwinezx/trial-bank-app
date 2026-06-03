@@ -17,8 +17,8 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/login").permitAll() // allow login without token
-                        .anyRequest().authenticated()          // everything else requires JWT
+                        .requestMatchers("/login").permitAll()
+                        .anyRequest().authenticated()
                 )
                 .addFilterBefore(new JwtFilter(), UsernamePasswordAuthenticationFilter.class);
 

@@ -24,14 +24,12 @@ public class JwtFilter extends OncePerRequestFilter {
                 String username = JwtUtils.extractUsername(token);
                 if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                     UsernamePasswordAuthenticationToken auth =
-                            new UsernamePasswordAuthenticationToken(
-                                    username, null, List.of() // empty authorities for now
-                            );
+                            new UsernamePasswordAuthenticationToken(username, null, List.of());
                     SecurityContextHolder.getContext().setAuthentication(auth);
                 }
             } catch (Exception e) {
                 response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-                return; // stop filter chain if token invalid
+                return;
             }
         }
 
