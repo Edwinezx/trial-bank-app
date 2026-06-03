@@ -1,5 +1,6 @@
 package com.edwin.trial_bank_app.dto;
 
+import com.edwin.trial_bank_app.enums.AccountType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -16,4 +17,5 @@ public class AccountInfo {
     private String accountName;
     private BigDecimal accountBalance;
     private String accountNumber;
+    private AccountType accountType;
 }

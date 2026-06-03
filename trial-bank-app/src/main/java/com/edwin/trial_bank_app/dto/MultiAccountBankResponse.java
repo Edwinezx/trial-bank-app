@@ -11,9 +11,9 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class BankResponse {
+public class MultiAccountBankResponse {
 
     private String responseCode;
     private String responseMessage;
-    private AccountInfo accountInfo;
+    private List<AccountInfo> accountInfo;
 }
