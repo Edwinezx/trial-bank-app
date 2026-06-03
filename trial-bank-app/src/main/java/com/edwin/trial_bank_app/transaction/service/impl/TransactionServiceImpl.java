@@ -6,7 +6,7 @@ import com.edwin.trial_bank_app.entity.Account;
 import com.edwin.trial_bank_app.entity.User;
 import com.edwin.trial_bank_app.repository.AccountRepository;
 
-import com.edwin.trial_bank_app.repository.UserRepository;
+
 import com.edwin.trial_bank_app.transaction.service.TransactionService;
 import com.edwin.trial_bank_app.utils.AccountUtils;
 import org.springframework.stereotype.Service;
@@ -18,13 +18,12 @@ public class TransactionServiceImpl implements TransactionService {
 
     private final AccountRepository accountRepository;
     private final EmailService emailService;
-    private final UserRepository userRepository;
+
 
     public TransactionServiceImpl(AccountRepository accountRepository,
-                                  EmailService emailService, UserRepository userRepository) {
+                                  EmailService emailService) {
         this.accountRepository = accountRepository;
         this.emailService = emailService;
-        this.userRepository = userRepository;
     }
 
     //  find account or return null response

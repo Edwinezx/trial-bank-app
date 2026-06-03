@@ -11,7 +11,8 @@ import java.util.List;
 public class MultiAccountBankResponse {
     private String responseCode;
     private String responseMessage;
-    private List<AccountInfo> accountInfo; // multiple accounts
+    private List<AccountInfo> accountInfo; // multiple account
+    private String token;
 }
 
 

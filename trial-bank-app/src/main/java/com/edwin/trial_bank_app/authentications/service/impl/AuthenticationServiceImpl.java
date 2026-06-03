@@ -8,6 +8,7 @@ import com.edwin.trial_bank_app.entity.Account;
 import com.edwin.trial_bank_app.entity.User;
 import com.edwin.trial_bank_app.repository.AccountRepository;
 import com.edwin.trial_bank_app.repository.UserRepository;
+import com.edwin.trial_bank_app.security.jwt.JwtUtils;
 import com.edwin.trial_bank_app.utils.AccountUtils;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -54,11 +55,15 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                     .toList();
 
 
+            String token = JwtUtils.generateToken(foundUser.getEmail());
+
             return MultiAccountBankResponse.builder()
                     .responseCode(AccountUtils.LOGIN_SUCCESS_CODE)
                     .responseMessage(AccountUtils.LOGIN_SUCCESS_MSG)
+                    .token(token)
                     .accountInfo(accountInfos)
                     .build();
+
         } else {
             return MultiAccountBankResponse.builder()
                     .responseCode(AccountUtils.LOGIN_FAILURE_CODE)
