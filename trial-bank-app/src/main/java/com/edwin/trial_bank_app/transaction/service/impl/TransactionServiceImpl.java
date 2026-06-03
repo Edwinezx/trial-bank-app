@@ -6,21 +6,25 @@ import com.edwin.trial_bank_app.entity.Account;
 import com.edwin.trial_bank_app.entity.User;
 import com.edwin.trial_bank_app.repository.AccountRepository;
 
+import com.edwin.trial_bank_app.repository.UserRepository;
 import com.edwin.trial_bank_app.transaction.service.TransactionService;
 import com.edwin.trial_bank_app.utils.AccountUtils;
 import org.springframework.stereotype.Service;
-
 import java.math.BigDecimal;
+import java.util.List;
+
 @Service
 public class TransactionServiceImpl implements TransactionService {
 
     private final AccountRepository accountRepository;
     private final EmailService emailService;
+    private final UserRepository userRepository;
 
     public TransactionServiceImpl(AccountRepository accountRepository,
-                                  EmailService emailService) {
+                                  EmailService emailService, UserRepository userRepository) {
         this.accountRepository = accountRepository;
         this.emailService = emailService;
+        this.userRepository = userRepository;
     }
 
     //  find account or return null response
@@ -39,6 +43,7 @@ public class TransactionServiceImpl implements TransactionService {
                 .accountName(user.getLastName() + " " + user.getFirstName() + " " + user.getOtherName())
                 .accountBalance(account.getAccountBalance())
                 .accountNumber(account.getAccountNumber())
+                .accountType(account.getAccountType())
                 .build();
     }
 
@@ -88,8 +93,10 @@ public class TransactionServiceImpl implements TransactionService {
     @Override
     public BankResponse transferMoney(TransferRequest request) {
         Account sourceAccount = accountRepository.findByAccountNumber(request.getSourceAccountNumber());
+
         if (sourceAccount == null) {
-            return accountNotFoundResponse(AccountUtils.SOURCE_ACCOUNT_DOES_NOT_EXIST, AccountUtils.SOURCE_ACCOUNT_DOES_NOT_EXIST_MSG);
+            return accountNotFoundResponse(AccountUtils.SOURCE_ACCOUNT_DOES_NOT_EXIST,
+                    "Source account does not belong to logged-in user");
         }
 
         Account destinationAccount = accountRepository.findByAccountNumber(request.getDestinationAccountNumber());
@@ -106,13 +113,9 @@ public class TransactionServiceImpl implements TransactionService {
                     .build();
         }
 
-        // Debit source
         sourceAccount.setAccountBalance(sourceAccount.getAccountBalance().subtract(amount));
-        accountRepository.save(sourceAccount);
-
-        // Credit destination
         destinationAccount.setAccountBalance(destinationAccount.getAccountBalance().add(amount));
-        accountRepository.save(destinationAccount);
+        accountRepository.saveAll(List.of(sourceAccount, destinationAccount));
 
         // Alerts
         emailService.sendEmailAlert(EmailDetails.builder()

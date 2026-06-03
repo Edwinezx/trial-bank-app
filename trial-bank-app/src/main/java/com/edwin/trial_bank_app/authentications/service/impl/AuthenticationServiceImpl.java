@@ -2,7 +2,6 @@ package com.edwin.trial_bank_app.authentications.service.impl;
 
 import com.edwin.trial_bank_app.authentications.service.AuthenticationService;
 import com.edwin.trial_bank_app.dto.AccountInfo;
-import com.edwin.trial_bank_app.dto.BankResponse;
 import com.edwin.trial_bank_app.dto.LoginRequest;
 import com.edwin.trial_bank_app.dto.MultiAccountBankResponse;
 import com.edwin.trial_bank_app.entity.Account;
@@ -22,14 +21,14 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final UserRepository userRepository;
     private final AccountRepository accountRepository;
 
-    public AuthenticationServiceImpl(PasswordEncoder passwordEncoder, UserRepository userRepository, AccountRepository accountRepository) {
+    public AuthenticationServiceImpl(PasswordEncoder passwordEncoder,
+                                     UserRepository userRepository,
+                                     AccountRepository accountRepository) {
         this.passwordEncoder = passwordEncoder;
         this.userRepository = userRepository;
         this.accountRepository = accountRepository;
     }
 
-
-    //Login test
     @Override
     public MultiAccountBankResponse appLogin(LoginRequest loginRequest) {
         boolean doesUserExist = userRepository.existsByEmail(loginRequest.getUsername());
@@ -45,7 +44,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         List<Account> userAccounts = accountRepository.findByUser(foundUser);
 
         if (passwordEncoder.matches(loginRequest.getPassword(), foundUser.getPassword())) {
-            // ✅ map each account to AccountInfo
             List<AccountInfo> accountInfos = userAccounts.stream()
                     .map(acc -> AccountInfo.builder()
                             .accountName(foundUser.getLastName() + " " + foundUser.getFirstName() + " " + foundUser.getOtherName())
@@ -55,10 +53,11 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                             .build())
                     .toList();
 
+
             return MultiAccountBankResponse.builder()
                     .responseCode(AccountUtils.LOGIN_SUCCESS_CODE)
                     .responseMessage(AccountUtils.LOGIN_SUCCESS_MSG)
-                    .accountInfo(accountInfos) // matches DTO type
+                    .accountInfo(accountInfos)
                     .build();
         } else {
             return MultiAccountBankResponse.builder()
