@@ -1,6 +1,10 @@
 package com.edwin.trial_bank_app.utils;
 
 
+import com.edwin.trial_bank_app.dto.AccountInfo;
+import com.edwin.trial_bank_app.entity.Account;
+import com.edwin.trial_bank_app.entity.User;
+
 import java.time.Year;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -54,11 +58,11 @@ public class AccountUtils {
 
     public static final String USER_NOT_FOUND_MSG = "User Not Found";
 
-    public static final String LOGIN_SUCCESS_CODE= "013";
+    public static final String LOGIN_SUCCESS_CODE = "013";
 
     public static final String LOGIN_SUCCESS_MSG = "Login Successful";
 
-    public static final String LOGIN_FAILURE_CODE= "014";
+    public static final String LOGIN_FAILURE_CODE = "014";
 
     public static final String LOGIN_FAILURE_MSG = "Login Failed, Incorrect Password";
 
@@ -85,6 +89,23 @@ public class AccountUtils {
 
     public static String generateFixedAccountNumber() {
         return generateAccountNumber("2281", 100000, 999999);
+    }
+
+    public static AccountInfo mapToAccountInfo(Account account) {
+        User sourceUser = account.getUser();
+
+        String accountName = String.format("%s %s %s",
+                sourceUser.getLastName() != null ? sourceUser.getLastName() : "",
+                sourceUser.getOtherName() != null ? sourceUser.getOtherName() : "",
+                sourceUser.getFirstName() != null ? sourceUser.getFirstName() : ""
+        ).trim();
+
+        return AccountInfo.builder()
+                .accountNumber(account.getAccountNumber())
+                .accountName(accountName)
+                .accountBalance(account.getAccountBalance())
+                .accountType(account.getAccountType())
+                .build();
     }
 }
 

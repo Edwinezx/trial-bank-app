@@ -1,12 +1,12 @@
 package com.edwin.trial_bank_app.transaction.service;
 
 import com.edwin.trial_bank_app.dto.*;
+import com.edwin.trial_bank_app.entity.Account;
 
+import java.math.BigDecimal;
 
 public interface TransactionService {
-    BankResponse creditAccount(CreditDebitRequest request);
-
-    BankResponse debitAccount(CreditDebitRequest request);
-
-    BankResponse transferMoney(TransferRequest request);
+    MultiAccountBankResponse transferFunds(String destinationAccountNumber, BigDecimal amount);
 }
+
+

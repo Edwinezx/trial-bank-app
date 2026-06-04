@@ -1,5 +1,6 @@
 package com.edwin.trial_bank_app.entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 import java.util.List;
@@ -28,6 +29,7 @@ public class User extends BaseEntity {
     private String password;
 
 
+    @JsonManagedReference
     @OneToMany(mappedBy = "user")
     private List<Account> accounts;
 

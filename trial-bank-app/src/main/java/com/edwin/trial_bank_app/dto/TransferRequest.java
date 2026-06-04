@@ -12,7 +12,6 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @Builder
 public class TransferRequest {
-    private String sourceAccountNumber;
     private String destinationAccountNumber;
     private BigDecimal amount;
 }

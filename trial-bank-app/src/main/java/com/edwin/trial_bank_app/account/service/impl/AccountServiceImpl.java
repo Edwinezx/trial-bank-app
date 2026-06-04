@@ -109,7 +109,7 @@ public class AccountServiceImpl implements AccountService {
                 .responseMessage(AccountUtils.ACCOUNT_CREATION_MSG)
                 .accountInfo(AccountInfo.builder()
                         .accountNumber(savedAccount.getAccountNumber())
-                        .accountName(savedAccount.getUser().getFirstName() + " " + savedAccount.getUser().getLastName())
+                        .accountName(savedAccount.getUser().getFirstName() + " "+savedAccount.getUser().getOtherName()+" " + savedAccount.getUser().getLastName())
                         .accountBalance(savedAccount.getAccountBalance())
                         .accountType(savedAccount.getAccountType())
                         .build())

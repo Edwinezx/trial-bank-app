@@ -2,6 +2,7 @@ package com.edwin.trial_bank_app.entity;
 
 import com.edwin.trial_bank_app.enums.AccountStatus;
 import com.edwin.trial_bank_app.enums.AccountType;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -47,6 +48,7 @@ public class Account extends BaseEntity {
     private AccountStatus status;
 
 
+    @JsonBackReference
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
