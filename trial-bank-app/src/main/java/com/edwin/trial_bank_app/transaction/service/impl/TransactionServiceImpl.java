@@ -1,7 +1,8 @@
 package com.edwin.trial_bank_app.transaction.service.impl;
 
-import com.edwin.trial_bank_app.dto.AccountInfo;
+import com.edwin.trial_bank_app.dto.EmailDetails;
 import com.edwin.trial_bank_app.dto.MultiAccountBankResponse;
+import com.edwin.trial_bank_app.email.service.EmailService;
 import com.edwin.trial_bank_app.entity.Account;
 import com.edwin.trial_bank_app.entity.User;
 import com.edwin.trial_bank_app.repository.AccountRepository;
@@ -23,6 +24,7 @@ public class TransactionServiceImpl implements TransactionService {
 
     private final AccountRepository accountRepository;
     private final UserRepository userRepository;
+    private final EmailService emailService;
 
     @Override
     @Transactional
@@ -59,6 +61,8 @@ public class TransactionServiceImpl implements TransactionService {
                     .build();
         }
 
+
+
         // 🎯 Destination account lookup using Integer
         Account destinationAccount = accountRepository.findByAccountNumber(destinationAccountNumber);
         if (destinationAccount == null) {
@@ -67,13 +71,36 @@ public class TransactionServiceImpl implements TransactionService {
                     .responseMessage("Destination account not found")
                     .build();
         }
-
-        // 🔄 Perform transfer
+        //  Perform transfer
         sourceAccount.setAccountBalance(sourceAccount.getAccountBalance().subtract(amount));
         destinationAccount.setAccountBalance(destinationAccount.getAccountBalance().add(amount));
 
         accountRepository.save(sourceAccount);
         accountRepository.save(destinationAccount);
+
+            EmailDetails emailDetails = EmailDetails.builder()
+                    .recipientEmail(sourceUser.getEmail())
+                    .messageBody(
+                            "Transfer Successful. \n\nYour Account with Account Number: " + sourceAccount.getAccountNumber() +
+                                    " has been debited of the amount ₦"+ amount +
+                                    ", and your new Account Balance is : ₦" + sourceAccount.getAccountBalance()
+                    )
+                    .subject("Debit Alert")
+                    .build();
+
+        EmailDetails emailDetails2 = EmailDetails.builder()
+                .recipientEmail(destinationAccount.getUser().getEmail())
+                .messageBody(
+                        "Credit Successful. \n\nYour Account with Account Number: " + destinationAccount.getAccountNumber() +
+                                " has been credited with the amount ₦"+ amount +
+                                ", and your new Account Balance is : ₦" + destinationAccount.getAccountBalance()
+                )
+                .subject("Credit Alert")
+                .build();
+
+            emailService.sendEmailAlert(emailDetails);
+            emailService.sendEmailAlert(emailDetails2);
+
 
         return MultiAccountBankResponse.builder()
                 .responseCode(AccountUtils.TRANSFER_SUCCESS_CODE)

@@ -7,13 +7,14 @@ import com.edwin.trial_bank_app.entity.*;
 import com.edwin.trial_bank_app.enums.*;
 import com.edwin.trial_bank_app.repository.*;
 import com.edwin.trial_bank_app.utils.AccountUtils;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class AccountServiceImpl implements AccountService {
 
     private final UserRepository userRepository;
@@ -21,14 +22,6 @@ public class AccountServiceImpl implements AccountService {
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
 
-    public AccountServiceImpl(UserRepository userRepository,
-                              AccountRepository accountRepository,
-                              PasswordEncoder passwordEncoder, EmailService emailService) {
-        this.userRepository = userRepository;
-        this.accountRepository = accountRepository;
-        this.passwordEncoder = passwordEncoder;
-        this.emailService = emailService;
-    }
 
     @Override
     public BankResponse registerAccount(UserRequest userRequest) {
