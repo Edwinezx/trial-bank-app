@@ -23,10 +23,16 @@ public class User extends BaseEntity {
     private String gender;
     private String address;
     private String stateOfOrigin;
+
+    @Column(unique = true)
     private String email;
+
+    @Column(unique = true)
     private String phoneNumber;
+
     private String alternativePhoneNumber;
     private String password;
+    private String Role;
 
 
     @JsonManagedReference

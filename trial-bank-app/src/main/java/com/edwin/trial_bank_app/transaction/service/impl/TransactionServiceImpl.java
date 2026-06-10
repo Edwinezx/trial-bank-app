@@ -28,7 +28,7 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     @Transactional
-    public MultiAccountBankResponse transferFunds(String destinationAccountNumber, BigDecimal amount) {
+    public MultiAccountBankResponse transferFunds(String sourceAccountNumber, String destinationAccountNumber, BigDecimal amount) {
         // 🔑 Get logged-in user email from JWT
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String loggedInEmail = authentication.getName();
@@ -53,59 +53,67 @@ public class TransactionServiceImpl implements TransactionService {
 
         Account sourceAccount = sourceAccounts.get(0); // or let user specify
 
-        // 💰 Check balance
-        if (sourceAccount.getAccountBalance().compareTo(amount) < 0) {
-            return MultiAccountBankResponse.builder()
-                    .responseCode(AccountUtils.INSUFFICIENT_FUNDS_CODE)
-                    .responseMessage("Insufficient funds")
-                    .build();
-        }
+
+        if (sourceAccount.getStatus().isActive()) {
+            // 💰 Check balance
+            if (sourceAccount.getAccountBalance().compareTo(amount) < 0) {
+                return MultiAccountBankResponse.builder()
+                        .responseCode(AccountUtils.INSUFFICIENT_FUNDS_CODE)
+                        .responseMessage("Insufficient funds")
+                        .build();
+            }
 
 
+            // 🎯 Destination account lookup using Integer
+            Account destinationAccount = accountRepository.findByAccountNumber(destinationAccountNumber);
+            if (destinationAccount == null) {
+                return MultiAccountBankResponse.builder()
+                        .responseCode(AccountUtils.ACCOUNT_DOES_NOT_EXIST)
+                        .responseMessage("Destination account not found")
+                        .build();
+            }
+            //  Perform transfer
+            sourceAccount.setAccountBalance(sourceAccount.getAccountBalance().subtract(amount));
+            destinationAccount.setAccountBalance(destinationAccount.getAccountBalance().add(amount));
 
-        // 🎯 Destination account lookup using Integer
-        Account destinationAccount = accountRepository.findByAccountNumber(destinationAccountNumber);
-        if (destinationAccount == null) {
-            return MultiAccountBankResponse.builder()
-                    .responseCode(AccountUtils.ACCOUNT_DOES_NOT_EXIST)
-                    .responseMessage("Destination account not found")
-                    .build();
-        }
-        //  Perform transfer
-        sourceAccount.setAccountBalance(sourceAccount.getAccountBalance().subtract(amount));
-        destinationAccount.setAccountBalance(destinationAccount.getAccountBalance().add(amount));
-
-        accountRepository.save(sourceAccount);
-        accountRepository.save(destinationAccount);
+            accountRepository.save(sourceAccount);
+            accountRepository.save(destinationAccount);
 
             EmailDetails emailDetails = EmailDetails.builder()
                     .recipientEmail(sourceUser.getEmail())
                     .messageBody(
                             "Transfer Successful. \n\nYour Account with Account Number: " + sourceAccount.getAccountNumber() +
-                                    " has been debited of the amount ₦"+ amount +
+                                    " has been debited of the amount ₦" + amount +
                                     ", and your new Account Balance is : ₦" + sourceAccount.getAccountBalance()
                     )
                     .subject("Debit Alert")
                     .build();
 
-        EmailDetails emailDetails2 = EmailDetails.builder()
-                .recipientEmail(destinationAccount.getUser().getEmail())
-                .messageBody(
-                        "Credit Successful. \n\nYour Account with Account Number: " + destinationAccount.getAccountNumber() +
-                                " has been credited with the amount ₦"+ amount +
-                                ", and your new Account Balance is : ₦" + destinationAccount.getAccountBalance()
-                )
-                .subject("Credit Alert")
-                .build();
+            EmailDetails emailDetails2 = EmailDetails.builder()
+                    .recipientEmail(destinationAccount.getUser().getEmail())
+                    .messageBody(
+                            "Credit Successful. \n\nYour Account with Account Number: " + destinationAccount.getAccountNumber() +
+                                    " has been credited with the amount ₦" + amount +
+                                    ", and your new Account Balance is : ₦" + destinationAccount.getAccountBalance()
+                    )
+                    .subject("Credit Alert")
+                    .build();
 
             emailService.sendEmailAlert(emailDetails);
             emailService.sendEmailAlert(emailDetails2);
 
 
-        return MultiAccountBankResponse.builder()
-                .responseCode(AccountUtils.TRANSFER_SUCCESS_CODE)
-                .responseMessage("Transfer successful")
-                .accountInfo(List.of(AccountUtils.mapToAccountInfo(sourceAccount)))
-                .build();
+            return MultiAccountBankResponse.builder()
+                    .responseCode(AccountUtils.TRANSFER_SUCCESS_CODE)
+                    .responseMessage("Transfer successful")
+                    .accountInfo(List.of(AccountUtils.mapToAccountInfo(sourceAccount)))
+                    .build();
+        } else {
+            return MultiAccountBankResponse.builder()
+                    .responseCode(AccountUtils.ACCOUNT_INACTIVE_CODE)
+                    .responseMessage("This User account is currently unavailable")
+                    .accountInfo(null)
+                    .build();
+        }
     }
 }

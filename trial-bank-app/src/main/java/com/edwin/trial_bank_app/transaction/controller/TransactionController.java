@@ -3,10 +3,10 @@ package com.edwin.trial_bank_app.transaction.controller;
 import com.edwin.trial_bank_app.dto.MultiAccountBankResponse;
 import com.edwin.trial_bank_app.dto.TransferRequest;
 import com.edwin.trial_bank_app.transaction.service.TransactionService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
-import java.math.BigDecimal;
 
 @RestController
 @RequestMapping("/api/user")
@@ -17,8 +17,9 @@ public class TransactionController {
 
     // POST /transactions/transfer
     @PostMapping("/transfer")
-    public MultiAccountBankResponse transferFunds(@RequestBody TransferRequest transferRequest) {
+    public MultiAccountBankResponse transferFunds(@Valid @RequestBody TransferRequest transferRequest) {
         return transactionService.transferFunds(
+                transferRequest.getSourceAccountNumber(),
                 transferRequest.getDestinationAccountNumber(),
                 transferRequest.getAmount());
     }

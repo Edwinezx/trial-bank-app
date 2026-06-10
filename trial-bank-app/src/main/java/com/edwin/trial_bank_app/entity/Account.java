@@ -38,6 +38,7 @@ public class Account extends BaseEntity {
         return Objects.hash(id, accountNumber, accountBalance, interest, accountType, status, user);
     }
 
+    @Column(unique = true)
     private String accountNumber;
     private BigDecimal accountBalance;
     private BigDecimal interest;

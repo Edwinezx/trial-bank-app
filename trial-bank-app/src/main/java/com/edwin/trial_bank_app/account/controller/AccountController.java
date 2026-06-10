@@ -2,6 +2,7 @@ package com.edwin.trial_bank_app.account.controller;
 
 import com.edwin.trial_bank_app.account.service.AccountService;
 import com.edwin.trial_bank_app.dto.*;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -15,7 +16,7 @@ public class AccountController {
 
 
     @PostMapping("/register")
-    public BankResponse createAccount(@RequestBody CreateAccountRequest request) {
+    public BankResponse createAccount(@Valid @RequestBody CreateAccountRequest request) {
         return  accountService.registerAccount(request.getUserRequest());
     }
 
