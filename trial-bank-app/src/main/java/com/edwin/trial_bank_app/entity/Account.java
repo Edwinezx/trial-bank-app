@@ -5,11 +5,13 @@ import com.edwin.trial_bank_app.enums.AccountType;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.math.BigDecimal;
 import java.util.Objects;
 
-@SuppressWarnings("JpaDataSourceORMInspection")
+//@SuppressWarnings("JpaDataSourceORMInspection")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -51,5 +53,6 @@ public class Account extends BaseEntity {
     @JsonBackReference
     @ManyToOne
     @JoinColumn(name = "user_id")
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private User user;
 }
