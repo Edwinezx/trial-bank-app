@@ -1,4 +1,4 @@
-package com.edwin.trial_bank_app.transaction.service;
+package com.edwin.trial_bank_app.service;
 
 import com.edwin.trial_bank_app.dto.*;
 

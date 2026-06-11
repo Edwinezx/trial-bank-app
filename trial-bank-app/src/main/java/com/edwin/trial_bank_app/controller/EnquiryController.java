@@ -1,9 +1,9 @@
-package com.edwin.trial_bank_app.enquiry.controller;
+package com.edwin.trial_bank_app.controller;
 
 
 import com.edwin.trial_bank_app.dto.BankResponse;
 import com.edwin.trial_bank_app.dto.EnquiryRequest;
-import com.edwin.trial_bank_app.enquiry.service.EnquiryService;
+import com.edwin.trial_bank_app.service.EnquiryService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;

@@ -1,7 +1,7 @@
-package com.edwin.trial_bank_app.email.service.impl;
+package com.edwin.trial_bank_app.service.impl;
 
 import com.edwin.trial_bank_app.dto.EmailDetails;
-import com.edwin.trial_bank_app.email.service.EmailService;
+import com.edwin.trial_bank_app.service.EmailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.MailException;

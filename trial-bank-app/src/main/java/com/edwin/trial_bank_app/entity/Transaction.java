@@ -1,27 +1,33 @@
 package com.edwin.trial_bank_app.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import com.edwin.trial_bank_app.enums.TransactionStatus;
+import com.edwin.trial_bank_app.enums.TransactionType;
+import jakarta.persistence.*;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+@Data
+@Getter @Setter
+@NoArgsConstructor
 @Entity
-public class Transaction {
+@Table(name = "transactions")
+public class Transaction extends BaseEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private String transactionReference;
 
-    private String sourceAccount;
+    private String sourceAccountNumber;
 
-    private String destinationAccount;
+    private String destinationAccountNumber;
 
     private BigDecimal amount;
 
-    private String reference;
+    @Enumerated(EnumType.STRING)
+    private TransactionType transactionType;
+
+    @Enumerated(EnumType.STRING)
+    private TransactionStatus status;
 
     private LocalDateTime transactionDate;
 }

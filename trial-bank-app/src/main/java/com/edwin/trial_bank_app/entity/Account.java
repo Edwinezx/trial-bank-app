@@ -21,21 +21,17 @@ import java.util.Objects;
 @Table(name = "accounts")
 public class Account extends BaseEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
 
-    //equality checks
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         Account account = (Account) o;
-        return Objects.equals(id, account.id) && Objects.equals(accountNumber, account.accountNumber) && Objects.equals(accountBalance, account.accountBalance) && Objects.equals(interest, account.interest) && accountType == account.accountType && Objects.equals(status, account.status) && Objects.equals(user, account.user);
+        return Objects.equals(accountNumber, account.accountNumber) && Objects.equals(accountBalance, account.accountBalance) && Objects.equals(interest, account.interest) && accountType == account.accountType && status == account.status && Objects.equals(user, account.user);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, accountNumber, accountBalance, interest, accountType, status, user);
+        return Objects.hash(accountNumber, accountBalance, interest, accountType, status, user);
     }
 
     @Column(unique = true)

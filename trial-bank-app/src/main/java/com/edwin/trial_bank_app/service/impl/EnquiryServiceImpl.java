@@ -1,9 +1,9 @@
-package com.edwin.trial_bank_app.enquiry.service.impl;
+package com.edwin.trial_bank_app.service.impl;
 
 import com.edwin.trial_bank_app.dto.AccountInfo;
 import com.edwin.trial_bank_app.dto.BankResponse;
 import com.edwin.trial_bank_app.dto.EnquiryRequest;
-import com.edwin.trial_bank_app.enquiry.service.EnquiryService;
+import com.edwin.trial_bank_app.service.EnquiryService;
 import com.edwin.trial_bank_app.entity.Account;
 import com.edwin.trial_bank_app.entity.User;
 import com.edwin.trial_bank_app.repository.AccountRepository;

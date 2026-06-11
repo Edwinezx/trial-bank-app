@@ -93,19 +93,27 @@ public class AccountUtils {
 
     public static AccountInfo mapToAccountInfo(Account account) {
         User sourceUser = account.getUser();
+        User destinationUser = account.getUser();
 
-        String accountName = String.format("%s %s %s",
+        String sourceAccountName = String.format("%s %s %s",
                 sourceUser.getLastName() != null ? sourceUser.getLastName() : "",
                 sourceUser.getOtherName() != null ? sourceUser.getOtherName() : "",
                 sourceUser.getFirstName() != null ? sourceUser.getFirstName() : ""
         ).trim();
 
+        String destinationAccountName = String.format("%s %s %s",
+                sourceUser.getLastName() != null ? destinationUser.getLastName() : "",
+                sourceUser.getOtherName() != null ? destinationUser.getOtherName() : "",
+                sourceUser.getFirstName() != null ? destinationUser.getFirstName() : ""
+        ).trim();
+
         return AccountInfo.builder()
                 .accountNumber(account.getAccountNumber())
-                .accountName(accountName)
+                .accountName(sourceAccountName)
                 .accountBalance(account.getAccountBalance())
                 .accountType(account.getAccountType())
                 .build();
+
     }
 }
 

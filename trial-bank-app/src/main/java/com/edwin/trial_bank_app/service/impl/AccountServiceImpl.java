@@ -1,10 +1,11 @@
-package com.edwin.trial_bank_app.account.service.impl;
+package com.edwin.trial_bank_app.service.impl;
 
-import com.edwin.trial_bank_app.account.service.AccountService;
+import com.edwin.trial_bank_app.service.AccountService;
 import com.edwin.trial_bank_app.dto.*;
-import com.edwin.trial_bank_app.email.service.EmailService;
+import com.edwin.trial_bank_app.service.EmailService;
 import com.edwin.trial_bank_app.entity.*;
 import com.edwin.trial_bank_app.enums.*;
+import com.edwin.trial_bank_app.enums.AccountType;
 import com.edwin.trial_bank_app.repository.*;
 import com.edwin.trial_bank_app.utils.AccountUtils;
 import lombok.RequiredArgsConstructor;

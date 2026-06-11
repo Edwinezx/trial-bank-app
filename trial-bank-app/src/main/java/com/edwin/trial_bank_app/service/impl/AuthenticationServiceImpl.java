@@ -1,10 +1,9 @@
-package com.edwin.trial_bank_app.authentications.service.impl;
+package com.edwin.trial_bank_app.service.impl;
 
-import com.edwin.trial_bank_app.authentications.service.AuthenticationService;
+import com.edwin.trial_bank_app.service.AuthenticationService;
 import com.edwin.trial_bank_app.dto.AccountInfo;
 import com.edwin.trial_bank_app.dto.AuthResponse;
 import com.edwin.trial_bank_app.dto.LoginRequest;
-import com.edwin.trial_bank_app.dto.MultiAccountBankResponse;
 import com.edwin.trial_bank_app.entity.Account;
 import com.edwin.trial_bank_app.entity.User;
 import com.edwin.trial_bank_app.repository.AccountRepository;

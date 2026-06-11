@@ -1,8 +1,8 @@
-package com.edwin.trial_bank_app.transaction.controller;
+package com.edwin.trial_bank_app.controller;
 
 import com.edwin.trial_bank_app.dto.MultiAccountBankResponse;
 import com.edwin.trial_bank_app.dto.TransferRequest;
-import com.edwin.trial_bank_app.transaction.service.TransactionService;
+import com.edwin.trial_bank_app.service.TransactionService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;

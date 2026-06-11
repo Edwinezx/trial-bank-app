@@ -1,8 +1,9 @@
-package com.edwin.trial_bank_app.account.controller;
+package com.edwin.trial_bank_app.controller;
 
-import com.edwin.trial_bank_app.account.service.AccountService;
+import com.edwin.trial_bank_app.service.AccountService;
 import com.edwin.trial_bank_app.dto.*;
 import jakarta.validation.Valid;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -16,8 +17,8 @@ public class AccountController {
 
 
     @PostMapping("/register")
-    public BankResponse createAccount(@Valid @RequestBody CreateAccountRequest request) {
-        return  accountService.registerAccount(request.getUserRequest());
+    public ResponseEntity<BankResponse> createAccount(@Valid @RequestBody UserRequest request) {
+        return  ResponseEntity.ok().body(accountService.registerAccount(request));
     }
 
     @PostMapping("/close")
