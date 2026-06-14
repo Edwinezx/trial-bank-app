@@ -1,7 +1,7 @@
 package com.edwin.trial_bank_app.service.impl;
 
-import com.edwin.trial_bank_app.dto.MultiAccountBankResponse;
 import com.edwin.trial_bank_app.dto.TransferRequest;
+import com.edwin.trial_bank_app.dto.TransferResponse;
 import com.edwin.trial_bank_app.entity.Transaction;
 import com.edwin.trial_bank_app.enums.TransactionStatus;
 import com.edwin.trial_bank_app.enums.TransactionType;
@@ -9,12 +9,10 @@ import com.edwin.trial_bank_app.exception.AccountNotFoundException;
 import com.edwin.trial_bank_app.service.*;
 import com.edwin.trial_bank_app.entity.Account;
 import com.edwin.trial_bank_app.repository.AccountRepository;
-import com.edwin.trial_bank_app.utils.AccountUtils;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
-import java.util.List;
 
 
 @Service
@@ -31,7 +29,7 @@ public class TransferServiceImpl implements TransferService {
 
     @Transactional
     @Override
-    public void transferFunds(TransferRequest request) {
+    public TransferResponse transferFunds(TransferRequest request) {
 
         Account source = accountRepository.findByAccountNumber(
                 request.getSourceAccountNumber()
@@ -46,6 +44,8 @@ public class TransferServiceImpl implements TransferService {
         );
 
         BigDecimal amount = request.getAmount();
+
+        String narration = request.getNarration();
 
         validationService.validateTransfer(source, destination, amount);
 
@@ -65,6 +65,7 @@ public class TransferServiceImpl implements TransferService {
                         source.getAccountNumber(),
                         destination.getAccountNumber(),
                         amount,
+                        narration,
                         TransactionType.TRANSFER,
                         TransactionStatus.SUCCESS
                 );
@@ -79,6 +80,15 @@ public class TransferServiceImpl implements TransferService {
                 destination,
                 amount,
                 transaction.getTransactionReference()
+        );
+
+        return new TransferResponse(
+                transaction.getTransactionReference(),
+                source.getAccountNumber(),
+                destination.getAccountNumber(),
+                amount,
+                TransactionStatus.SUCCESS,
+                transaction.getCreatedAt()
         );
     }
 }

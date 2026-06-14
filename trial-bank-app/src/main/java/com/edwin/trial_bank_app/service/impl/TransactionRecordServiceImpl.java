@@ -23,6 +23,7 @@ public class TransactionRecordServiceImpl implements TransactionRecordService {
             String sourceAccount,
             String destinationAccount,
             BigDecimal amount,
+            String narration,
             TransactionType type,
             TransactionStatus status
     ) {
@@ -32,6 +33,7 @@ public class TransactionRecordServiceImpl implements TransactionRecordService {
         transaction.setSourceAccountNumber(sourceAccount);
         transaction.setDestinationAccountNumber(destinationAccount);
         transaction.setAmount(amount);
+        transaction.setNarration(narration);
         transaction.setTransactionType(type);
         transaction.setStatus(status);
         transaction.setTransactionReference(UUID.randomUUID().toString());

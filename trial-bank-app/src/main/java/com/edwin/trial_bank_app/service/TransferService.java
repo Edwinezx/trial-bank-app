@@ -4,7 +4,7 @@ import com.edwin.trial_bank_app.dto.*;
 
 
 public interface TransferService {
-    void transferFunds(TransferRequest request);
+    TransferResponse transferFunds(TransferRequest request);
 
 }
 

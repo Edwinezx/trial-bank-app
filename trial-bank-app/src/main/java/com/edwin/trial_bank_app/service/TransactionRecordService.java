@@ -12,6 +12,7 @@ public interface TransactionRecordService {
             String source,
             String destination,
             BigDecimal amount,
+            String narration,
             TransactionType type,
             TransactionStatus status
     );

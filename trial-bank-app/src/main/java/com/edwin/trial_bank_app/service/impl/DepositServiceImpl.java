@@ -1,7 +1,6 @@
 package com.edwin.trial_bank_app.service.impl;
 
 import com.edwin.trial_bank_app.dto.DepositRequest;
-import com.edwin.trial_bank_app.dto.MultiAccountBankResponse;
 import com.edwin.trial_bank_app.entity.Account;
 import com.edwin.trial_bank_app.entity.Transaction;
 import com.edwin.trial_bank_app.enums.TransactionStatus;
@@ -11,15 +10,11 @@ import com.edwin.trial_bank_app.repository.AccountRepository;
 import com.edwin.trial_bank_app.repository.TransactionRepository;
 import com.edwin.trial_bank_app.service.AccountValidationService;
 import com.edwin.trial_bank_app.service.DepositService;
-import com.edwin.trial_bank_app.utils.AccountUtils;
 import com.edwin.trial_bank_app.utils.TransactionUtils;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
 import java.math.BigDecimal;
-import java.util.List;
 
 @Service
 @AllArgsConstructor

@@ -3,6 +3,7 @@ package com.edwin.trial_bank_app.service.impl;
 import com.edwin.trial_bank_app.dto.AccountInfo;
 import com.edwin.trial_bank_app.dto.BankResponse;
 import com.edwin.trial_bank_app.dto.EnquiryRequest;
+import com.edwin.trial_bank_app.exception.AccountNotFoundException;
 import com.edwin.trial_bank_app.service.EnquiryService;
 import com.edwin.trial_bank_app.entity.Account;
 import com.edwin.trial_bank_app.entity.User;
@@ -22,15 +23,12 @@ public class EnquiryServiceImpl implements EnquiryService {
     @Override
     public BankResponse balanceEnquiry(EnquiryRequest request) {
         //check if provided account number exists in the db
-        boolean doesAccountExist = accountRepository.existsByAccountNumber(request.getAccountNumber());
-        if (!doesAccountExist) {
-            return BankResponse.builder()
-                    .responseCode(AccountUtils.ACCOUNT_DOES_NOT_EXIST)
-                    .responseMessage(AccountUtils.ACCOUNT_DOES_NOT_EXIST_MSG)
-                    .accountInfo(null)
-                    .build();
-        }
-        Account foundAccount = accountRepository.findByAccountNumber(request.getAccountNumber());
+        Account foundAccount = accountRepository.findByAccountNumber(request.getAccountNumber()
+        ).orElseThrow(()->
+                new AccountNotFoundException("Account not Found")
+        );
+
+
         User foundUser = foundAccount.getUser();
         return BankResponse.builder()
                 .responseCode(AccountUtils.ACCOUNT_FOUND_CODE)
@@ -46,11 +44,12 @@ public class EnquiryServiceImpl implements EnquiryService {
 
     @Override
     public String nameEnquiry(EnquiryRequest request) {
-        boolean doesAccountExist = accountRepository.existsByAccountNumber(request.getAccountNumber());
-        if (!doesAccountExist) {
-            return AccountUtils.ACCOUNT_DOES_NOT_EXIST_MSG;
-        }
-        Account foundAccount = accountRepository.findByAccountNumber(request.getAccountNumber());
+
+        Account foundAccount = accountRepository.findByAccountNumber(request.getAccountNumber()
+        ).orElseThrow(()->
+                new AccountNotFoundException("Account not Found")
+        );
+
         User foundUser = foundAccount.getUser();
         return foundUser.getLastName()  + " " + foundUser.getFirstName() + " " + foundUser.getOtherName();
     }

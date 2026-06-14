@@ -1,5 +1,6 @@
 package com.edwin.trial_bank_app.service.impl;
 
+import com.edwin.trial_bank_app.exception.AccountNotFoundException;
 import com.edwin.trial_bank_app.service.AccountService;
 import com.edwin.trial_bank_app.dto.*;
 import com.edwin.trial_bank_app.service.EmailService;
@@ -112,7 +113,10 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public BankResponse closeAccount(CloseAccountRequest request) {
-        Account foundAccount = accountRepository.findByAccountNumber(request.getAccountNumber());
+        Account foundAccount = accountRepository.findByAccountNumber(request.getAccountNumber()
+        ).orElseThrow(()->
+                new AccountNotFoundException("Account number not found.")
+                );
 
         if (foundAccount == null) {
             return BankResponse.builder()
