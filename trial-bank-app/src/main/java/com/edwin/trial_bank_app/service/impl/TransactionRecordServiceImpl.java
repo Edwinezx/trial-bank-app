@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -17,6 +18,18 @@ import java.util.UUID;
 public class TransactionRecordServiceImpl implements TransactionRecordService {
 
     private final TransactionRepository transactionRepository;
+
+    @Override
+    public List<Transaction> getTransactionHistory(
+            String accountNumber
+    ) {
+
+        return transactionRepository
+                .findBySourceAccountNumberOrDestinationAccountNumber(
+                        accountNumber,
+                        accountNumber
+                );
+    }
 
     @Override
     public Transaction recordTransaction(

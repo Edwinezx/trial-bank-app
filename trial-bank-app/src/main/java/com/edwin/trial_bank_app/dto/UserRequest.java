@@ -1,6 +1,7 @@
 package com.edwin.trial_bank_app.dto;
 
 import com.edwin.trial_bank_app.enums.AccountType;
+import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
@@ -38,6 +39,7 @@ public class UserRequest{
     @Pattern(regexp = "^[0-9]{11}$",
             message ="Invalid Phone number format")
     private String phoneNumber;
+
     @Pattern(regexp = "^[0-9]{11}$",
             message ="Invalid Phone number format")
     private String alternativePhoneNumber;

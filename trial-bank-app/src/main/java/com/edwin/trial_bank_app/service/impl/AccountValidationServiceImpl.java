@@ -20,7 +20,7 @@ public class AccountValidationServiceImpl
             BigDecimal amount) {
 
         if (account == null)
-            throw new AccountNotFoundException(account.getAccountNumber());
+            throw new AccountNotFoundException("Account not found");
 
         if (!account.getStatus().isActive())
             throw new InactiveAccountException(account.getAccountNumber());
@@ -52,7 +52,7 @@ public class AccountValidationServiceImpl
         validateWithdrawal(source, amount);
 
         if (destination == null)
-            throw new AccountNotFoundException(destination.getAccountNumber());
+            throw new AccountNotFoundException("Account not found");
 
 
         if (!destination.getStatus().isActive())
