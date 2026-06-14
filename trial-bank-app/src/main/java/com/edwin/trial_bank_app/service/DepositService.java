@@ -1,6 +1,6 @@
 package com.edwin.trial_bank_app.service;
 
-import com.edwin.trial_bank_app.dto.DepositRequest;
+import com.edwin.trial_bank_app.dto.request.DepositRequest;
 
 public interface DepositService {
     void depositMoney(DepositRequest request);

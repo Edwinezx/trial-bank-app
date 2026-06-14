@@ -1,8 +1,8 @@
 package com.edwin.trial_bank_app.service.impl;
 
 import com.edwin.trial_bank_app.dto.AccountInfo;
-import com.edwin.trial_bank_app.dto.BankResponse;
-import com.edwin.trial_bank_app.dto.EnquiryRequest;
+import com.edwin.trial_bank_app.dto.response.BankResponse;
+import com.edwin.trial_bank_app.dto.request.EnquiryRequest;
 import com.edwin.trial_bank_app.exception.AccountNotFoundException;
 import com.edwin.trial_bank_app.service.EnquiryService;
 import com.edwin.trial_bank_app.entity.Account;

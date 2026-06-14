@@ -1,11 +1,10 @@
 package com.edwin.trial_bank_app.service.impl;
 
 import com.edwin.trial_bank_app.entity.Account;
-import com.edwin.trial_bank_app.exception.AccountNotFoundException;
-import com.edwin.trial_bank_app.exception.InactiveAccountException;
-import com.edwin.trial_bank_app.exception.InsufficientFundsException;
-import com.edwin.trial_bank_app.exception.InvalidAmountException;
+import com.edwin.trial_bank_app.exception.*;
 import com.edwin.trial_bank_app.service.AccountValidationService;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -13,6 +12,8 @@ import java.math.BigDecimal;
 @Service
 public class AccountValidationServiceImpl
         implements AccountValidationService {
+
+
 
     @Override
     public void validateDeposit(
@@ -44,16 +45,40 @@ public class AccountValidationServiceImpl
     }
 
     @Override
+    public void validateOwnership(Account account) {
+        Authentication authentication =
+                SecurityContextHolder
+                        .getContext()
+                        .getAuthentication();
+
+        assert authentication != null;
+        String loggedInEmail =
+                authentication.getName();
+
+        String accountOwnerEmail =
+                account.getUser()
+                        .getEmail();
+
+        if (!accountOwnerEmail.equals(loggedInEmail)) {
+
+            throw new UnauthorizedAccountAccessException();
+        }
+    }
+
+    @Override
     public void validateTransfer(
             Account source,
             Account destination,
             BigDecimal amount) {
 
         validateWithdrawal(source, amount);
+        validateOwnership(source);
 
         if (destination == null)
             throw new AccountNotFoundException("Account not found");
 
+        if (destination == source)
+            throw new SelfTransactionException();
 
         if (!destination.getStatus().isActive())
             throw new InactiveAccountException(destination.getAccountNumber());

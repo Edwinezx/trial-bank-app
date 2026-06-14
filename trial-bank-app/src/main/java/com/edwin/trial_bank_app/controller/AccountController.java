@@ -1,7 +1,9 @@
 package com.edwin.trial_bank_app.controller;
 
+import com.edwin.trial_bank_app.dto.request.CloseAccountRequest;
+import com.edwin.trial_bank_app.dto.request.UserRequest;
+import com.edwin.trial_bank_app.dto.response.BankResponse;
 import com.edwin.trial_bank_app.service.AccountService;
-import com.edwin.trial_bank_app.dto.*;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

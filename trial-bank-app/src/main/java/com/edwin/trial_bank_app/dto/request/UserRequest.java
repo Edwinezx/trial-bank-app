@@ -1,7 +1,6 @@
-package com.edwin.trial_bank_app.dto;
+package com.edwin.trial_bank_app.dto.request;
 
 import com.edwin.trial_bank_app.enums.AccountType;
-import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;

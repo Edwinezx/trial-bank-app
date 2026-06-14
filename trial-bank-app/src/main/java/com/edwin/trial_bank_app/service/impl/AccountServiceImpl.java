@@ -1,5 +1,8 @@
 package com.edwin.trial_bank_app.service.impl;
 
+import com.edwin.trial_bank_app.dto.request.CloseAccountRequest;
+import com.edwin.trial_bank_app.dto.request.UserRequest;
+import com.edwin.trial_bank_app.dto.response.BankResponse;
 import com.edwin.trial_bank_app.exception.AccountNotFoundException;
 import com.edwin.trial_bank_app.service.AccountService;
 import com.edwin.trial_bank_app.dto.*;

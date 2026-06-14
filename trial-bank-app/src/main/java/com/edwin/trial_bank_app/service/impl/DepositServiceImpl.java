@@ -1,6 +1,6 @@
 package com.edwin.trial_bank_app.service.impl;
 
-import com.edwin.trial_bank_app.dto.DepositRequest;
+import com.edwin.trial_bank_app.dto.request.DepositRequest;
 import com.edwin.trial_bank_app.entity.Account;
 import com.edwin.trial_bank_app.entity.Transaction;
 import com.edwin.trial_bank_app.enums.TransactionStatus;

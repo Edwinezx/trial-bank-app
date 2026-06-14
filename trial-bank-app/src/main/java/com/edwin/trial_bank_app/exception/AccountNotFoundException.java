@@ -8,7 +8,7 @@ public class AccountNotFoundException
             String accountNumber) {
 
         super(
-                "No account with account number " + accountNumber + " found."
+                "No account with account number found."
         );
     }
 }

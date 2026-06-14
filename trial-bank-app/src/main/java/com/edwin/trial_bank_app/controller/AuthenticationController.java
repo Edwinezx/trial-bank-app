@@ -1,7 +1,8 @@
 package com.edwin.trial_bank_app.controller;
 
+import com.edwin.trial_bank_app.dto.request.LoginRequest;
+import com.edwin.trial_bank_app.dto.response.AuthResponse;
 import com.edwin.trial_bank_app.service.AuthenticationService;
-import com.edwin.trial_bank_app.dto.*;
 import org.springframework.web.bind.annotation.*;
 
 @RestController

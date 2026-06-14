@@ -1,7 +1,7 @@
 
 package com.edwin.trial_bank_app.exception;
 
-import com.edwin.trial_bank_app.dto.ErrorResponse;
+import com.edwin.trial_bank_app.dto.response.ErrorResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;

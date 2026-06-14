@@ -1,7 +1,7 @@
 package com.edwin.trial_bank_app.controller;
 
-import com.edwin.trial_bank_app.dto.TransferRequest;
-import com.edwin.trial_bank_app.dto.TransferResponse;
+import com.edwin.trial_bank_app.dto.request.TransferRequest;
+import com.edwin.trial_bank_app.dto.response.TransferResponse;
 import com.edwin.trial_bank_app.entity.Transaction;
 import com.edwin.trial_bank_app.service.TransactionRecordService;
 import com.edwin.trial_bank_app.service.TransferService;

@@ -11,7 +11,6 @@ import org.hibernate.annotations.OnDeleteAction;
 import java.math.BigDecimal;
 import java.util.Objects;
 
-//@SuppressWarnings("JpaDataSourceORMInspection")
 @Getter
 @Setter
 @NoArgsConstructor
