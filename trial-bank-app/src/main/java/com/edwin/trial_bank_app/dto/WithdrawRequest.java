@@ -13,13 +13,10 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class TransferRequest {
+public class WithdrawRequest {
 
     @NotNull(message = "Source account is required")
     private String sourceAccountNumber;
-
-    @NotNull(message = "Destination account is required")
-    private String destinationAccountNumber;
 
     @NotNull(message = "Amount is required")
     @Positive(message = "Amount must be greater than 0")

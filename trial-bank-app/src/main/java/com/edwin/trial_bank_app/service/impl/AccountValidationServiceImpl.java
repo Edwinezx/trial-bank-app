@@ -1,6 +1,10 @@
 package com.edwin.trial_bank_app.service.impl;
 
 import com.edwin.trial_bank_app.entity.Account;
+import com.edwin.trial_bank_app.exception.AccountNotFoundException;
+import com.edwin.trial_bank_app.exception.InactiveAccountException;
+import com.edwin.trial_bank_app.exception.InsufficientFundsException;
+import com.edwin.trial_bank_app.exception.InvalidAmountException;
 import com.edwin.trial_bank_app.service.AccountValidationService;
 import org.springframework.stereotype.Service;
 
@@ -16,13 +20,13 @@ public class AccountValidationServiceImpl
             BigDecimal amount) {
 
         if (account == null)
-            throw new RuntimeException("Account not found");
+            throw new AccountNotFoundException(account.getAccountNumber());
 
         if (!account.getStatus().isActive())
-            throw new RuntimeException("Account inactive");
+            throw new InactiveAccountException(account.getAccountNumber());
 
         if (amount.compareTo(BigDecimal.ZERO) <= 0)
-            throw new RuntimeException("Invalid amount");
+            throw new InvalidAmountException(amount);
     }
 
     @Override
@@ -32,11 +36,10 @@ public class AccountValidationServiceImpl
 
         validateDeposit(account, amount);
 
-        if (account.getAccountBalance()
+        if (account.getAvailableBalance()
                 .compareTo(amount) < 0) {
 
-            throw new RuntimeException(
-                    "Insufficient funds");
+            throw new InsufficientFundsException(account.getAvailableBalance(),amount);
         }
     }
 
@@ -49,11 +52,10 @@ public class AccountValidationServiceImpl
         validateWithdrawal(source, amount);
 
         if (destination == null)
-            throw new RuntimeException(
-                    "Destination account not found");
+            throw new AccountNotFoundException(destination.getAccountNumber());
+
 
         if (!destination.getStatus().isActive())
-            throw new RuntimeException(
-                    "Destination account inactive");
+            throw new InactiveAccountException(destination.getAccountNumber());
     }
 }

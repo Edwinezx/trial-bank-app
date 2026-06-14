@@ -7,8 +7,8 @@ import java.math.BigDecimal;
 public interface AccountValidationService {
 
     void validateTransfer(
-            Account source,
-            Account destination,
+            Account sourceAccount,
+            Account destinationAccount,
             BigDecimal amount);
 
     void validateDeposit(

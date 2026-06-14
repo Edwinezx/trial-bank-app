@@ -21,22 +21,33 @@ import java.util.Objects;
 @Table(name = "accounts")
 public class Account extends BaseEntity {
 
-
     @Override
     public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
-        Account account = (Account) o;
-        return Objects.equals(accountNumber, account.accountNumber) && Objects.equals(accountBalance, account.accountBalance) && Objects.equals(interest, account.interest) && accountType == account.accountType && status == account.status && Objects.equals(user, account.user);
+
+        if (this == o) return true;
+
+        if (!(o instanceof Account account))
+            return false;
+
+        return Objects.equals(
+                accountNumber,
+                account.accountNumber
+        );
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(accountNumber, accountBalance, interest, accountType, status, user);
+        return Objects.hash(accountNumber);
     }
+
+    @Version
+    private Long version;
+
 
     @Column(unique = true)
     private String accountNumber;
-    private BigDecimal accountBalance;
+    private BigDecimal availableBalance;
+    private BigDecimal ledgerBalance;
     private BigDecimal interest;
 
     @Enumerated(EnumType.STRING)

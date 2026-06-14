@@ -23,7 +23,7 @@ public class TransactionEmailNotificationServiceImpl implements TransactionNotif
                         .recipientEmail(account.getUser().getEmail())
                         .messageBody("Amount: ₦" + amount +
                                 "\nReference: " + reference +
-                                "\nBalance:  ₦" + account.getAccountBalance())
+                                "\nBalance:  ₦" + account.getAvailableBalance())
                         .subject("Debit Alert")
                         .attachment(null)
                         .build();
@@ -40,7 +40,7 @@ public class TransactionEmailNotificationServiceImpl implements TransactionNotif
                         .recipientEmail(account.getUser().getEmail())
                         .messageBody("Amount: ₦" + amount +
                                 "\nReference: " + reference +
-                                "\nBalance:  ₦" + account.getAccountBalance())
+                                "\nBalance:  ₦" + account.getAvailableBalance())
                         .subject("Credit Alert")
                         .attachment(null)
                         .build();

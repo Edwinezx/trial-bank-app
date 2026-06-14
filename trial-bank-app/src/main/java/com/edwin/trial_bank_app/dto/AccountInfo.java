@@ -15,7 +15,7 @@ import java.math.BigDecimal;
 public class AccountInfo {
 
     private String accountName;
-    private BigDecimal accountBalance;
+    private BigDecimal availableBalance;
     private String accountNumber;
     private AccountType accountType;
 }

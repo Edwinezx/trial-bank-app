@@ -49,7 +49,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                     .map(acc -> AccountInfo.builder()
                             .accountName(foundUser.getLastName() + " " + foundUser.getFirstName() + " " + foundUser.getOtherName())
                             .accountNumber(acc.getAccountNumber())
-                            .accountBalance(acc.getAccountBalance())
+                            .availableBalance(acc.getAvailableBalance())
                             .accountType(acc.getAccountType())
                             .build())
                     .toList();

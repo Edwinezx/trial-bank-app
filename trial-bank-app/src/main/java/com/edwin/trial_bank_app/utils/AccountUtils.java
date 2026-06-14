@@ -103,7 +103,7 @@ public class AccountUtils {
         return AccountInfo.builder()
                 .accountNumber(account.getAccountNumber())
                 .accountName(sourceAccountName)
-                .accountBalance(account.getAccountBalance())
+                .availableBalance(account.getAvailableBalance())
                 .accountType(account.getAccountType())
                 .build();
 

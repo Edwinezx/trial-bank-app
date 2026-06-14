@@ -38,7 +38,7 @@ public class EnquiryServiceImpl implements EnquiryService {
                 .accountInfo(AccountInfo.builder()
                         .accountName(foundUser.getLastName() + " " + foundUser.getFirstName() + " " + foundUser.getOtherName())
                         .accountNumber(foundAccount.getAccountNumber())
-                        .accountBalance(foundAccount.getAccountBalance())
+                        .availableBalance(foundAccount.getAvailableBalance())
                         .accountType(foundAccount.getAccountType())
                         .build())
                 .build();

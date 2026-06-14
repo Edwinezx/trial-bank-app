@@ -70,7 +70,7 @@ public class AccountServiceImpl implements AccountService {
 
         Account newAccount = Account.builder()
                 .accountNumber(accountNumber)
-                .accountBalance(BigDecimal.ZERO)
+                .availableBalance(BigDecimal.ZERO)
                 .accountType(accountType)
                 .status(AccountStatus.ACTIVE)
                 .user(savedUser)
@@ -87,7 +87,7 @@ public class AccountServiceImpl implements AccountService {
                                     "Account name: " + savedUser.getLastName() + " " + savedUser.getFirstName() + " " + savedUser.getOtherName() +
                                     "\nAccount Type: " + savedAccount.getAccountType() +
                                     "\nAccount Number: " + savedAccount.getAccountNumber() +
-                                    "\nAccount Balance: ₦" + savedAccount.getAccountBalance()
+                                    "\nAccount Balance: ₦" + savedAccount.getAvailableBalance()
                     )
                     .subject("ACCOUNT CREATION")
                     .build();
@@ -104,7 +104,7 @@ public class AccountServiceImpl implements AccountService {
                 .accountInfo(AccountInfo.builder()
                         .accountNumber(savedAccount.getAccountNumber())
                         .accountName(savedAccount.getUser().getFirstName() + " "+savedAccount.getUser().getOtherName()+" " + savedAccount.getUser().getLastName())
-                        .accountBalance(savedAccount.getAccountBalance())
+                        .availableBalance(savedAccount.getAvailableBalance())
                         .accountType(savedAccount.getAccountType())
                         .build())
                 .build();
@@ -132,7 +132,7 @@ public class AccountServiceImpl implements AccountService {
                 .accountInfo(AccountInfo.builder()
                         .accountNumber(foundAccount.getAccountNumber())
                         .accountName(foundAccount.getUser().getFirstName() + " " + foundAccount.getUser().getLastName())
-                        .accountBalance(foundAccount.getAccountBalance())
+                        .availableBalance(foundAccount.getAvailableBalance())
                         .accountType(foundAccount.getAccountType())
                         .build())
                 .build();

@@ -13,12 +13,9 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class TransferRequest {
+public class DepositRequest {
 
-    @NotNull(message = "Source account is required")
-    private String sourceAccountNumber;
-
-    @NotNull(message = "Destination account is required")
+    @NotNull(message = "destination account is required")
     private String destinationAccountNumber;
 
     @NotNull(message = "Amount is required")

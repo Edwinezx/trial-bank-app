@@ -1,61 +1,53 @@
 package com.edwin.trial_bank_app.service.impl;
 
+import com.edwin.trial_bank_app.dto.DepositRequest;
 import com.edwin.trial_bank_app.dto.MultiAccountBankResponse;
 import com.edwin.trial_bank_app.entity.Account;
 import com.edwin.trial_bank_app.entity.Transaction;
 import com.edwin.trial_bank_app.enums.TransactionStatus;
 import com.edwin.trial_bank_app.enums.TransactionType;
+import com.edwin.trial_bank_app.exception.AccountNotFoundException;
 import com.edwin.trial_bank_app.repository.AccountRepository;
 import com.edwin.trial_bank_app.repository.TransactionRepository;
+import com.edwin.trial_bank_app.service.AccountValidationService;
 import com.edwin.trial_bank_app.service.DepositService;
 import com.edwin.trial_bank_app.utils.AccountUtils;
 import com.edwin.trial_bank_app.utils.TransactionUtils;
 import jakarta.transaction.Transactional;
+import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.List;
 
 @Service
+@AllArgsConstructor
 public class DepositServiceImpl implements DepositService {
 
     private AccountRepository accountRepository;
     private TransactionRepository transactionRepository;
+    private AccountValidationService validationService;
 
 
     @Override
     @Transactional
-    public MultiAccountBankResponse deposit(
-            String accountNumber,
-            BigDecimal amount) {
+    public void depositMoney(DepositRequest request) {
 
-        if (amount == null ||
-                amount.compareTo(BigDecimal.ZERO) <= 0) {
-
-            return MultiAccountBankResponse.builder()
-                    .responseMessage("Invalid deposit amount")
-                    .build();
-        }
 
         Account account =
-                accountRepository.findByAccountNumber(accountNumber);
+                accountRepository.findByAccountNumber(request.getDestinationAccountNumber()
+                ).orElseThrow(()->
+                        new AccountNotFoundException("Source account not found")
+                );
 
-        if (account == null) {
+        BigDecimal amount = request.getAmount();
 
-            return MultiAccountBankResponse.builder()
-                    .responseMessage("Account not found")
-                    .build();
-        }
+        validationService.validateDeposit(account, amount);
 
-        if (!account.getStatus().isActive()) {
 
-            return MultiAccountBankResponse.builder()
-                    .responseMessage("Account inactive")
-                    .build();
-        }
-
-        account.setAccountBalance(
-                account.getAccountBalance().add(amount));
+        account.setAvailableBalance(
+                account.getAvailableBalance().add(amount));
 
         accountRepository.save(account);
 
@@ -80,13 +72,5 @@ public class DepositServiceImpl implements DepositService {
 
         transactionRepository.save(transaction);
 
-        return MultiAccountBankResponse.builder()
-                .responseMessage("Deposit successful")
-                .accountInfo(
-                        List.of(
-                                AccountUtils.mapToAccountInfo(account)
-                        )
-                )
-                .build();
     }
 }

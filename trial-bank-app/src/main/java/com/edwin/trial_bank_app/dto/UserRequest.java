@@ -46,7 +46,7 @@ public class UserRequest{
     private String password;
     private String role;
     private String accountNumber;
-    private BigDecimal accountBalance;
+    private BigDecimal availableBalance;
 
     private AccountType accountType;
 }

@@ -1,9 +1,11 @@
 package com.edwin.trial_bank_app.service.impl;
 
 import com.edwin.trial_bank_app.dto.MultiAccountBankResponse;
+import com.edwin.trial_bank_app.dto.TransferRequest;
 import com.edwin.trial_bank_app.entity.Transaction;
 import com.edwin.trial_bank_app.enums.TransactionStatus;
 import com.edwin.trial_bank_app.enums.TransactionType;
+import com.edwin.trial_bank_app.exception.AccountNotFoundException;
 import com.edwin.trial_bank_app.service.*;
 import com.edwin.trial_bank_app.entity.Account;
 import com.edwin.trial_bank_app.repository.AccountRepository;
@@ -29,39 +31,39 @@ public class TransferServiceImpl implements TransferService {
 
     @Transactional
     @Override
-    public MultiAccountBankResponse transferFunds(
-            String sourceAccountNumber,
-            String destinationAccountNumber,
-            BigDecimal amount) {
+    public void transferFunds(TransferRequest request) {
 
-        Account source =
-                accountRepository.findByAccountNumber(
-                        sourceAccountNumber);
+        Account source = accountRepository.findByAccountNumber(
+                request.getSourceAccountNumber()
+        ).orElseThrow(() ->
+                new AccountNotFoundException("Source account not found")
+        );
 
-        Account destination =
-                accountRepository.findByAccountNumber(
-                        destinationAccountNumber);
+        Account destination = accountRepository.findByAccountNumber(
+                request.getDestinationAccountNumber()
+        ).orElseThrow(() ->
+                new AccountNotFoundException("Destination account not found")
+        );
 
-        validationService.validateTransfer(
-                source,
-                destination,
-                amount);
+        BigDecimal amount = request.getAmount();
 
-        source.setAccountBalance(
-                source.getAccountBalance()
-                        .subtract(amount));
+        validationService.validateTransfer(source, destination, amount);
 
-        destination.setAccountBalance(
-                destination.getAccountBalance()
-                        .add(amount));
+        source.setAvailableBalance(
+                source.getAvailableBalance().subtract(amount)
+        );
+
+        destination.setAvailableBalance(
+                destination.getAvailableBalance().add(amount)
+        );
 
         accountRepository.save(source);
         accountRepository.save(destination);
 
         Transaction transaction =
                 transactionRecordService.recordTransaction(
-                        sourceAccountNumber,
-                        destinationAccountNumber,
+                        source.getAccountNumber(),
+                        destination.getAccountNumber(),
                         amount,
                         TransactionType.TRANSFER,
                         TransactionStatus.SUCCESS
@@ -78,16 +80,5 @@ public class TransferServiceImpl implements TransferService {
                 amount,
                 transaction.getTransactionReference()
         );
-
-        return MultiAccountBankResponse.builder()
-                .responseCode(AccountUtils.TRANSFER_SUCCESS_CODE)
-                .responseMessage(
-                        "Transfer successful")
-                .accountInfo(
-                List.of(
-                        AccountUtils.mapToAccountInfo(source)
-                )
-        )
-                .build();
     }
 }

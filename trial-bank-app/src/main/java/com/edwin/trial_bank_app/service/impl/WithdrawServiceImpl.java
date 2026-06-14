@@ -1,67 +1,48 @@
 package com.edwin.trial_bank_app.service.impl;
 
-import com.edwin.trial_bank_app.dto.MultiAccountBankResponse;
+import com.edwin.trial_bank_app.dto.WithdrawRequest;
 import com.edwin.trial_bank_app.entity.Account;
 import com.edwin.trial_bank_app.entity.Transaction;
 import com.edwin.trial_bank_app.enums.TransactionStatus;
 import com.edwin.trial_bank_app.enums.TransactionType;
+import com.edwin.trial_bank_app.exception.AccountNotFoundException;
 import com.edwin.trial_bank_app.repository.AccountRepository;
 import com.edwin.trial_bank_app.repository.TransactionRepository;
+import com.edwin.trial_bank_app.service.AccountValidationService;
 import com.edwin.trial_bank_app.service.WithdrawService;
-import com.edwin.trial_bank_app.utils.AccountUtils;
 import com.edwin.trial_bank_app.utils.TransactionUtils;
 import jakarta.transaction.Transactional;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.util.List;
 
 @Service
+@AllArgsConstructor
 public class WithdrawServiceImpl implements WithdrawService {
+
     private AccountRepository accountRepository;
     private TransactionRepository transactionRepository;
+    private final AccountValidationService validationService;
+
 
     @Override
     @Transactional
-    public MultiAccountBankResponse withdraw(
-            String accountNumber,
-            BigDecimal amount) {
+    public void withdrawMoney(WithdrawRequest request) {
 
-        if (amount == null ||
-                amount.compareTo(BigDecimal.ZERO) <= 0) {
-
-            return MultiAccountBankResponse.builder()
-                    .responseMessage("Invalid withdrawal amount")
-                    .build();
-        }
 
         Account account =
-                accountRepository.findByAccountNumber(accountNumber);
+                accountRepository.findByAccountNumber(request.getSourceAccountNumber()
+                ).orElseThrow(() ->
+                new AccountNotFoundException("Source account not found")
+        );
 
-        if (account == null) {
+        BigDecimal amount = request.getAmount();
 
-            return MultiAccountBankResponse.builder()
-                    .responseMessage("Account not found")
-                    .build();
-        }
+        validationService.validateWithdrawal(account, amount);
 
-        if (!account.getStatus().isActive()) {
-
-            return MultiAccountBankResponse.builder()
-                    .responseMessage("Account inactive")
-                    .build();
-        }
-
-        if (account.getAccountBalance()
-                .compareTo(amount) < 0) {
-
-            return MultiAccountBankResponse.builder()
-                    .responseMessage("Insufficient funds")
-                    .build();
-        }
-
-        account.setAccountBalance(
-                account.getAccountBalance().subtract(amount));
+        account.setAvailableBalance(
+                account.getAvailableBalance().subtract(amount));
 
         accountRepository.save(account);
 
@@ -73,7 +54,7 @@ public class WithdrawServiceImpl implements WithdrawService {
         transaction.setSourceAccountNumber(
                 account.getAccountNumber());
 
-        transaction.setAmount(amount);
+        transaction.setAmount(request.getAmount());
 
         transaction.setTransactionType(
                 TransactionType.WITHDRAWAL);
@@ -86,13 +67,5 @@ public class WithdrawServiceImpl implements WithdrawService {
 
         transactionRepository.save(transaction);
 
-        return MultiAccountBankResponse.builder()
-                .responseMessage("Withdrawal successful")
-                .accountInfo(
-                        List.of(
-                                AccountUtils.mapToAccountInfo(account)
-                        )
-                )
-                .build();
     }
 }
