@@ -247,5 +247,4 @@ All errors are handled centrally via a **Global Exception Handler**, which produ
 ## 👨‍💻 Author
 
 **Edwin Ezue**
-Computer Science — Final Year Project
 *Trial Bank Application – Secure Digital Banking Platform*
