@@ -21,9 +21,9 @@ public class SecurityConfig {
                                 "/api/user/login",
                                 "/api/user/register",
                                 "/api/user/balanceEnquiry",
-                                "/swagger-ui.html",
-                                "/swagger-ui/index.html",
-                                "/v3/api-docs").permitAll()
+                                "/swagger-ui/**",
+                                "/v3/api-docs/**",
+                                "/swagger-ui.html").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(new JwtFilter(), UsernamePasswordAuthenticationFilter.class);

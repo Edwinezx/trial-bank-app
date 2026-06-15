@@ -3,6 +3,7 @@ package com.edwin.trial_bank_app.service.impl;
 import com.edwin.trial_bank_app.entity.Account;
 import com.edwin.trial_bank_app.exception.*;
 import com.edwin.trial_bank_app.service.AccountValidationService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -10,9 +11,9 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 
 @Service
+@RequiredArgsConstructor
 public class AccountValidationServiceImpl
         implements AccountValidationService {
-
 
 
     @Override

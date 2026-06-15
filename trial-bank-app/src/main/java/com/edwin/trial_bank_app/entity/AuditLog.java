@@ -1,16 +1,23 @@
 package com.edwin.trial_bank_app.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
+import lombok.*;
 
 @Entity
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Table(name = "audit_logs")
 public class AuditLog extends BaseEntity {
 
-    private String actor;
     private String action;
-    private String reference;
-    private String ipAddress;
-    private String description;
 
+    private String username;
+
+    private String status;
+
+    @Column(length = 1000)
+    private String details;
 }

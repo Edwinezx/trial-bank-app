@@ -9,6 +9,7 @@ import com.edwin.trial_bank_app.exception.AccountNotFoundException;
 import com.edwin.trial_bank_app.repository.AccountRepository;
 import com.edwin.trial_bank_app.repository.TransactionRepository;
 import com.edwin.trial_bank_app.service.AccountValidationService;
+import com.edwin.trial_bank_app.service.AuditService;
 import com.edwin.trial_bank_app.service.DepositService;
 import com.edwin.trial_bank_app.utils.TransactionUtils;
 import jakarta.transaction.Transactional;
@@ -23,6 +24,7 @@ public class DepositServiceImpl implements DepositService {
     private AccountRepository accountRepository;
     private TransactionRepository transactionRepository;
     private AccountValidationService validationService;
+    private final AuditService auditService;
 
 
     @Override
@@ -38,8 +40,20 @@ public class DepositServiceImpl implements DepositService {
 
         BigDecimal amount = request.getAmount();
 
-        validationService.validateDeposit(account, amount);
+        try {
 
+            validationService.validateDeposit(account, amount);
+        } catch (Exception ex) {
+
+            auditService.log(
+                    "DEPOSIT",
+                    account.getUser().getEmail(),
+                    "FAILED",
+                    ex.getMessage()
+            );
+
+            throw ex;
+        }
 
         account.setAvailableBalance(
                 account.getAvailableBalance().add(amount));

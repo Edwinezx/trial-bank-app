@@ -27,6 +27,8 @@ public class TransferServiceImpl implements TransferService {
 
     private final TransactionNotificationService notificationService;
 
+    private final AuditService auditService;
+
     @Transactional
     @Override
     public TransferResponse transferFunds(TransferRequest request) {
@@ -47,18 +49,46 @@ public class TransferServiceImpl implements TransferService {
 
         String narration = request.getNarration();
 
-        validationService.validateTransfer(source, destination, amount);
+        try {
+            validationService.validateTransfer(
+                    source,
+                    destination,
+                    amount
+            );
 
-        source.setAvailableBalance(
-                source.getAvailableBalance().subtract(amount)
-        );
+            source.setAvailableBalance(
+                    source.getAvailableBalance()
+                            .subtract(amount)
+            );
 
-        destination.setAvailableBalance(
-                destination.getAvailableBalance().add(amount)
-        );
+            destination.setAvailableBalance(
+                    destination.getAvailableBalance()
+                            .add(amount)
+            );
 
-        accountRepository.save(source);
-        accountRepository.save(destination);
+            accountRepository.save(source);
+
+            accountRepository.save(destination);
+
+            auditService.log(
+                    "TRANSFER",
+                    source.getUser().getEmail(),
+                    "SUCCESS",
+                    "Transfer successful"
+            );
+
+        } catch (Exception ex) {
+
+            auditService.log(
+                    "TRANSFER",
+                    source.getUser().getEmail(),
+                    "FAILED",
+                    ex.getMessage()
+            );
+
+            throw ex;
+        }
+
 
         Transaction transaction =
                 transactionRecordService.recordTransaction(

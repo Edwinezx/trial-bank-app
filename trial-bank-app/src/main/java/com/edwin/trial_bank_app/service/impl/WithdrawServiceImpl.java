@@ -9,6 +9,7 @@ import com.edwin.trial_bank_app.exception.AccountNotFoundException;
 import com.edwin.trial_bank_app.repository.AccountRepository;
 import com.edwin.trial_bank_app.repository.TransactionRepository;
 import com.edwin.trial_bank_app.service.AccountValidationService;
+import com.edwin.trial_bank_app.service.AuditService;
 import com.edwin.trial_bank_app.service.WithdrawService;
 import com.edwin.trial_bank_app.utils.TransactionUtils;
 import jakarta.transaction.Transactional;
@@ -24,6 +25,7 @@ public class WithdrawServiceImpl implements WithdrawService {
     private AccountRepository accountRepository;
     private TransactionRepository transactionRepository;
     private final AccountValidationService validationService;
+    private final AuditService auditService;
 
 
     @Override
@@ -39,7 +41,21 @@ public class WithdrawServiceImpl implements WithdrawService {
 
         BigDecimal amount = request.getAmount();
 
-        validationService.validateWithdrawal(account, amount);
+        try {
+
+            validationService.validateWithdrawal(account, amount);
+
+        } catch (Exception ex) {
+
+            auditService.log(
+                    "WITHDRAW",
+                    account.getUser().getEmail(),
+                    "FAILED",
+                    ex.getMessage()
+            );
+
+            throw ex;
+        }
 
         account.setAvailableBalance(
                 account.getAvailableBalance().subtract(amount));
