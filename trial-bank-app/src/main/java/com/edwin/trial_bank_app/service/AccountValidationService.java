@@ -1,7 +1,6 @@
 package com.edwin.trial_bank_app.service;
 
 import com.edwin.trial_bank_app.entity.Account;
-import com.edwin.trial_bank_app.entity.User;
 
 import java.math.BigDecimal;
 

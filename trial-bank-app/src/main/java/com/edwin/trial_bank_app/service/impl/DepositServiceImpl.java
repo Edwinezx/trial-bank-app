@@ -2,84 +2,59 @@ package com.edwin.trial_bank_app.service.impl;
 
 import com.edwin.trial_bank_app.dto.request.DepositRequest;
 import com.edwin.trial_bank_app.entity.Account;
-import com.edwin.trial_bank_app.entity.Transaction;
 import com.edwin.trial_bank_app.enums.TransactionStatus;
 import com.edwin.trial_bank_app.enums.TransactionType;
 import com.edwin.trial_bank_app.exception.AccountNotFoundException;
 import com.edwin.trial_bank_app.repository.AccountRepository;
-import com.edwin.trial_bank_app.repository.TransactionRepository;
-import com.edwin.trial_bank_app.service.AccountValidationService;
-import com.edwin.trial_bank_app.service.AuditService;
-import com.edwin.trial_bank_app.service.DepositService;
-import com.edwin.trial_bank_app.utils.TransactionUtils;
+import com.edwin.trial_bank_app.service.*;
 import jakarta.transaction.Transactional;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
 import java.math.BigDecimal;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class DepositServiceImpl implements DepositService {
 
-    private AccountRepository accountRepository;
-    private TransactionRepository transactionRepository;
-    private AccountValidationService validationService;
-    private final AuditService auditService;
-
+    private final AccountRepository        accountRepository;
+    private final AccountValidationService validationService;
+    private final TransactionRecordService transactionRecordService;
+    private final AuditService             auditService;
 
     @Override
     @Transactional
     public void depositMoney(DepositRequest request) {
-
-
-        Account account =
-                accountRepository.findByAccountNumber(request.getDestinationAccountNumber()
-                ).orElseThrow(()->
-                        new AccountNotFoundException("Source account not found")
-                );
+        Account account = accountRepository.findByAccountNumber(request.getDestinationAccountNumber())
+                .orElseThrow(() -> new AccountNotFoundException(
+                        "Account not found: " + request.getDestinationAccountNumber()));
 
         BigDecimal amount = request.getAmount();
 
         try {
-
             validationService.validateDeposit(account, amount);
-        } catch (Exception ex) {
 
-            auditService.log(
-                    "DEPOSIT",
-                    account.getUser().getEmail(),
-                    "FAILED",
-                    ex.getMessage()
+            account.setAvailableBalance(account.getAvailableBalance().add(amount));
+            accountRepository.save(account);
+
+            transactionRecordService.recordTransaction(
+                    null,
+                    account.getAccountNumber(),
+                    amount,
+                    "Cash deposit",
+                    TransactionType.DEPOSIT,
+                    TransactionStatus.SUCCESS
             );
 
+            // REQUIRES_NEW in AuditServiceImpl — persists even if main tx rolls back
+            auditService.log("DEPOSIT", account.getUser().getEmail(), "SUCCESS",
+                    "Deposited ₦" + amount, account.getAccountNumber());
+
+        } catch (Exception ex) {
+            // REQUIRES_NEW — this persists even though the main tx will roll back
+            auditService.log("DEPOSIT", account.getUser().getEmail(), "FAILED",
+                    ex.getMessage(), account.getAccountNumber());
             throw ex;
         }
-
-        account.setAvailableBalance(
-                account.getAvailableBalance().add(amount));
-
-        accountRepository.save(account);
-
-        Transaction transaction = new Transaction();
-
-        transaction.setTransactionReference(
-                TransactionUtils.generateReference());
-
-        transaction.setDestinationAccountNumber(
-                account.getAccountNumber());
-
-        transaction.setAmount(amount);
-
-        transaction.setTransactionType(
-                TransactionType.DEPOSIT);
-
-        transaction.setStatus(
-                TransactionStatus.SUCCESS);
-
-        transaction.setTransactionDate(
-                java.time.LocalDateTime.now());
-
-        transactionRepository.save(transaction);
-
     }
 }

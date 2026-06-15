@@ -1,7 +1,10 @@
 package com.edwin.trial_bank_app.dto.response;
 
 import com.edwin.trial_bank_app.enums.TransactionStatus;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;

@@ -1,5 +1,6 @@
 package com.edwin.trial_bank_app.entity;
 
+import com.edwin.trial_bank_app.enums.Roles;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
@@ -29,7 +30,7 @@ public class User extends BaseEntity {
 
     private String alternativePhoneNumber;
     private String password;
-    private String Role;
+    private Roles role;
 
 
     @JsonManagedReference

@@ -1,14 +1,14 @@
 package com.edwin.trial_bank_app.service.impl;
 
-import com.edwin.trial_bank_app.service.AuthenticationService;
 import com.edwin.trial_bank_app.dto.AccountInfo;
-import com.edwin.trial_bank_app.dto.response.AuthResponse;
 import com.edwin.trial_bank_app.dto.request.LoginRequest;
+import com.edwin.trial_bank_app.dto.response.AuthResponse;
 import com.edwin.trial_bank_app.entity.Account;
 import com.edwin.trial_bank_app.entity.User;
 import com.edwin.trial_bank_app.repository.AccountRepository;
 import com.edwin.trial_bank_app.repository.UserRepository;
 import com.edwin.trial_bank_app.security.jwt.JwtUtils;
+import com.edwin.trial_bank_app.service.AuthenticationService;
 import com.edwin.trial_bank_app.utils.AccountUtils;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -21,13 +21,16 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final PasswordEncoder passwordEncoder;
     private final UserRepository userRepository;
     private final AccountRepository accountRepository;
+    private final JwtUtils jwtUtils;
 
     public AuthenticationServiceImpl(PasswordEncoder passwordEncoder,
                                      UserRepository userRepository,
-                                     AccountRepository accountRepository) {
+                                     AccountRepository accountRepository,
+                                     JwtUtils jwtUtils) {
         this.passwordEncoder = passwordEncoder;
         this.userRepository = userRepository;
         this.accountRepository = accountRepository;
+        this.jwtUtils = jwtUtils;
     }
 
     @Override
@@ -55,7 +58,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                     .toList();
 
 
-            String token = JwtUtils.generateToken(foundUser.getEmail());
+            String token = jwtUtils.generateToken(foundUser.getEmail());
 
             return AuthResponse.builder()
                     .responseCode(AccountUtils.LOGIN_SUCCESS_CODE)

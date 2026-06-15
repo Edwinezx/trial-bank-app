@@ -4,21 +4,25 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
 import java.security.Key;
 import java.util.Date;
 
+@Component
 public class JwtUtils {
-   // @Value("${jwt.secret}")
-    private static String secretKey = "b7f1c9d2a8e4f6c1d9a3f8e7b2c6d4a9f1e8c3b5d7a0f9e2c6b1d4a8f3c7e9d2";
+
+    @Value("${jwt.secret}")
+    private String secretKey;
+
     private static final long EXPIRATION_TIME = 86400000; // 1 day
 
-    private static Key getSigningKey() {
+    private Key getSigningKey() {
         return Keys.hmacShaKeyFor(secretKey.getBytes());
     }
 
-    public static String generateToken(String username) {
+    public String generateToken(String username) {
         return Jwts.builder()
                 .setSubject(username)
                 .setIssuedAt(new Date())
@@ -27,7 +31,7 @@ public class JwtUtils {
                 .compact();
     }
 
-    public static String extractUsername(String token) {
+    public String extractUsername(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(getSigningKey())
                 .build()

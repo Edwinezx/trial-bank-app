@@ -1,41 +1,53 @@
 package com.edwin.trial_bank_app.controller;
 
+import com.edwin.trial_bank_app.dto.request.DepositRequest;
 import com.edwin.trial_bank_app.dto.request.TransferRequest;
+import com.edwin.trial_bank_app.dto.request.WithdrawRequest;
+import com.edwin.trial_bank_app.dto.response.TransactionStatementResponse;
 import com.edwin.trial_bank_app.dto.response.TransferResponse;
-import com.edwin.trial_bank_app.entity.Transaction;
+import com.edwin.trial_bank_app.service.DepositService;
 import com.edwin.trial_bank_app.service.TransactionRecordService;
 import com.edwin.trial_bank_app.service.TransferService;
+import com.edwin.trial_bank_app.service.WithdrawService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
-
 
 @RestController
 @RequestMapping("/api/user")
 @RequiredArgsConstructor
 public class TransactionController {
 
-    private final TransferService transferService;
+    private final TransferService          transferService;
+    private final DepositService           depositService;
+    private final WithdrawService          withdrawService;
     private final TransactionRecordService transactionRecordService;
 
-    // POST /transactions/transfer
     @PostMapping("/transfer")
-    public ResponseEntity<TransferResponse> transfer(@Valid @RequestBody TransferRequest transferRequest) {
-        //TransferResponse transferResponse = transferService.transferFunds(transferRequest);
-        return  ResponseEntity.ok().body(transferService.transferFunds(transferRequest));
+    public ResponseEntity<TransferResponse> transfer(@Valid @RequestBody TransferRequest request) {
+        return ResponseEntity.ok(transferService.transferFunds(request));
     }
 
+    @PostMapping("/deposit")
+    public ResponseEntity<String> deposit(@Valid @RequestBody DepositRequest request) {
+        depositService.depositMoney(request);
+        return ResponseEntity.ok("Deposit successful");
+    }
+
+    @PostMapping("/withdraw")
+    public ResponseEntity<String> withdraw(@Valid @RequestBody WithdrawRequest request) {
+        withdrawService.withdrawMoney(request);
+        return ResponseEntity.ok("Withdrawal successful");
+    }
+
+    // Phase 8: paginated history/statement
     @GetMapping("/history/{accountNumber}")
-    public ResponseEntity<List<Transaction>> getHistory(
-            @PathVariable String accountNumber
+    public ResponseEntity<TransactionStatementResponse> getHistory(
+            @PathVariable String accountNumber,
+            @RequestParam(defaultValue = "0")  int page,
+            @RequestParam(defaultValue = "20") int size
     ) {
-        return ResponseEntity.ok(
-                transactionRecordService.getTransactionHistory(
-                        accountNumber
-                )
-        );
+        return ResponseEntity.ok(transactionRecordService.getTransactionHistory(accountNumber, page, size));
     }
 }
