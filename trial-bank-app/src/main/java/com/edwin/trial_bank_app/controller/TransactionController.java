@@ -24,16 +24,14 @@ public class TransactionController {
     // POST /transactions/transfer
     @PostMapping("/transfer")
     public ResponseEntity<TransferResponse> transfer(@Valid @RequestBody TransferRequest transferRequest) {
-        TransferResponse transferResponse = transferService.transferFunds(transferRequest);
-
-        return   ResponseEntity.ok(transferResponse);
+        //TransferResponse transferResponse = transferService.transferFunds(transferRequest);
+        return  ResponseEntity.ok().body(transferService.transferFunds(transferRequest));
     }
 
     @GetMapping("/history/{accountNumber}")
     public ResponseEntity<List<Transaction>> getHistory(
             @PathVariable String accountNumber
     ) {
-
         return ResponseEntity.ok(
                 transactionRecordService.getTransactionHistory(
                         accountNumber

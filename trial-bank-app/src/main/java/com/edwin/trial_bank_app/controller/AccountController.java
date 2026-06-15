@@ -24,7 +24,7 @@ public class AccountController {
     }
 
     @PostMapping("/close")
-    public BankResponse closeAccount(@RequestBody CloseAccountRequest request){
-         return accountService.closeAccount(request);
+    public ResponseEntity<BankResponse>closeAccount(@RequestBody CloseAccountRequest request){
+         return ResponseEntity.ok().body(accountService.closeAccount(request));
     }
 }

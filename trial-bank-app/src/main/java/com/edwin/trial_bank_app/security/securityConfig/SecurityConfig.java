@@ -17,7 +17,13 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) {
         http.csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/user/login", "/api/user/register","/api/user/balanceEnquiry").permitAll()
+                        .requestMatchers(
+                                "/api/user/login",
+                                "/api/user/register",
+                                "/api/user/balanceEnquiry",
+                                "/swagger-ui.html",
+                                "/swagger-ui/index.html",
+                                "/v3/api-docs").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(new JwtFilter(), UsernamePasswordAuthenticationFilter.class);
