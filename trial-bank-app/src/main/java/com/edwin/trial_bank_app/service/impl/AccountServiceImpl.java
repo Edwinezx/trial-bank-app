@@ -2,7 +2,6 @@ package com.edwin.trial_bank_app.service.impl;
 
 import com.edwin.trial_bank_app.dto.AccountInfo;
 import com.edwin.trial_bank_app.dto.EmailDetails;
-import com.edwin.trial_bank_app.dto.request.CloseAccountRequest;
 import com.edwin.trial_bank_app.dto.request.UserRequest;
 import com.edwin.trial_bank_app.dto.response.BankResponse;
 import com.edwin.trial_bank_app.entity.Account;
@@ -47,6 +46,7 @@ public class AccountServiceImpl implements AccountService {
                         .build();
             }
             savedUser = foundUser;
+
         } else {
             savedUser = userRepository.save(User.builder()
                     .firstName(userRequest.getFirstName())
@@ -94,8 +94,8 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public BankResponse closeAccount(CloseAccountRequest request) {
-        Account account = findAccount(request.getAccountNumber());
+    public BankResponse closeAccount(String accountNumber) {
+        Account account = findAccount(accountNumber);
         account.setStatus(AccountStatus.CLOSED);
         accountRepository.save(account);
         auditService.log("ACCOUNT_CLOSED", account.getUser().getEmail(), "SUCCESS",
@@ -138,6 +138,18 @@ public class AccountServiceImpl implements AccountService {
         sendEmail(account.getUser().getEmail(), "Account Dormant",
                 "Your account " + accountNumber + " has been marked dormant due to inactivity.");
         return successResponse("018", "Account marked as dormant", account);
+    }
+
+    @Override
+    public BankResponse activateAccount(String accountNumber) {
+        Account account = findAccount(accountNumber);
+        account.setStatus(AccountStatus.ACTIVE);
+        accountRepository.save(account);
+        auditService.log("ACCOUNT_ACTIVE", account.getUser().getEmail(), "SUCCESS",
+                "Account marked active", accountNumber);
+        sendEmail(account.getUser().getEmail(), "Account Activated",
+                "Your account " + accountNumber + " has been successfully activated.");
+        return successResponse("018", "Account activated", account);
     }
 
     // ── helpers ──────────────────────────────────────────────────────────────

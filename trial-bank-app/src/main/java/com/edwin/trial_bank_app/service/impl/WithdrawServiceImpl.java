@@ -49,7 +49,6 @@ public class WithdrawServiceImpl implements WithdrawService {
                     TransactionStatus.SUCCESS
             );
 
-            // REQUIRES_NEW in AuditServiceImpl — persists even if main tx rolls back
             auditService.log("WITHDRAWAL", account.getUser().getEmail(), "SUCCESS",
                     "Withdrew ₦" + amount, account.getAccountNumber());
 

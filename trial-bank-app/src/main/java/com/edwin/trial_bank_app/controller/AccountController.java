@@ -1,6 +1,5 @@
 package com.edwin.trial_bank_app.controller;
 
-import com.edwin.trial_bank_app.dto.request.CloseAccountRequest;
 import com.edwin.trial_bank_app.dto.request.UserRequest;
 import com.edwin.trial_bank_app.dto.response.BankResponse;
 import com.edwin.trial_bank_app.service.AccountService;
@@ -21,9 +20,9 @@ public class AccountController {
         return ResponseEntity.ok(accountService.registerAccount(request));
     }
 
-    @PostMapping("/close")
-    public ResponseEntity<BankResponse> closeAccount(@RequestBody CloseAccountRequest request) {
-        return ResponseEntity.ok(accountService.closeAccount(request));
+    @PatchMapping("/close/{accountNumber}")
+    public ResponseEntity<BankResponse> closeAccount(@PathVariable String accountNumber) {
+        return ResponseEntity.ok(accountService.closeAccount(accountNumber));
     }
 
     @PatchMapping("/freeze/{accountNumber}")
@@ -39,5 +38,10 @@ public class AccountController {
     @PatchMapping("/dormant/{accountNumber}")
     public ResponseEntity<BankResponse> markDormant(@PathVariable String accountNumber) {
         return ResponseEntity.ok(accountService.markDormant(accountNumber));
+    }
+
+    @PatchMapping("/activate/{accountNumber}")
+    public ResponseEntity<BankResponse> activateAccount(@PathVariable String accountNumber) {
+        return ResponseEntity.ok(accountService.activateAccount(accountNumber));
     }
 }
