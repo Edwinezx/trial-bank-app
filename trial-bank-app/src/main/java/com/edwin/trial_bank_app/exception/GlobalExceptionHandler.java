@@ -24,7 +24,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(InsufficientFundsException.class)
     public ResponseEntity<ErrorResponse> handleInsufficientFunds(InsufficientFundsException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(error("4400", ex.getMessage()));
+                .body(error("400", ex.getMessage()));
     }
 
     @ExceptionHandler(InactiveAccountException.class)

@@ -32,7 +32,7 @@ public class EnquiryServiceImpl implements EnquiryService {
                         .accountName(foundUser.getLastName() + " " + foundUser.getFirstName() + " " + foundUser.getOtherName())
                         .accountNumber(foundAccount.getAccountNumber())
                         .availableBalance(foundAccount.getAvailableBalance())
-                        .accountType(foundAccount.getAccountType())
+                        .accountType(foundAccount.getAccountType().getTypeName())
                         .build())
                 .build();
     }

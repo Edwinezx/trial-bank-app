@@ -7,10 +7,11 @@ import com.edwin.trial_bank_app.dto.response.BankResponse;
 import com.edwin.trial_bank_app.entity.Account;
 import com.edwin.trial_bank_app.entity.User;
 import com.edwin.trial_bank_app.enums.AccountStatus;
-import com.edwin.trial_bank_app.enums.AccountType;
+import com.edwin.trial_bank_app.entity.AccountType;
 import com.edwin.trial_bank_app.enums.Roles;
 import com.edwin.trial_bank_app.exception.AccountNotFoundException;
 import com.edwin.trial_bank_app.repository.AccountRepository;
+import com.edwin.trial_bank_app.repository.AccountTypeRepository;
 import com.edwin.trial_bank_app.repository.UserRepository;
 import com.edwin.trial_bank_app.service.AccountService;
 import com.edwin.trial_bank_app.service.AuditService;
@@ -31,6 +32,7 @@ public class AccountServiceImpl implements AccountService {
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
     private final AuditService auditService;
+    private final AccountTypeRepository accountTypeRepository;
 
     @Override
     public BankResponse registerAccount(UserRequest userRequest) {
@@ -63,10 +65,11 @@ public class AccountServiceImpl implements AccountService {
                     .build());
         }
 
-        String accountNumber = switch (accountType) {
-            case SAVINGS -> AccountUtils.generateSavingsAccountNumber();
-            case CURRENT -> AccountUtils.generateCurrentAccountNumber();
-            case FIXED   -> AccountUtils.generateFixedAccountNumber();
+        String accountNumber = switch (accountType.getTypeName()) {
+            case "SAVINGS" -> AccountUtils.generateSavingsAccountNumber();
+            case "CURRENT" -> AccountUtils.generateCurrentAccountNumber();
+            case "FIXED"   -> AccountUtils.generateFixedAccountNumber();
+            default -> throw new IllegalStateException("Unexpected value: " + accountType.getTypeName());
         };
 
         Account savedAccount = accountRepository.save(Account.builder()
@@ -173,7 +176,7 @@ public class AccountServiceImpl implements AccountService {
                         + account.getUser().getOtherName() + " "
                         + account.getUser().getLastName())
                 .availableBalance(account.getAvailableBalance())
-                .accountType(account.getAccountType())
+                .accountType(account.getAccountType().getTypeName())
                 .build();
     }
 

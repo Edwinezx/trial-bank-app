@@ -1,6 +1,6 @@
 package com.edwin.trial_bank_app.dto.request;
 
-import com.edwin.trial_bank_app.enums.AccountType;
+import com.edwin.trial_bank_app.entity.AccountType;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
@@ -45,9 +45,12 @@ public class UserRequest{
 
     @NotBlank
     private String password;
+
+    @NotBlank
     private String role;
     private String accountNumber;
     private BigDecimal availableBalance;
 
+    @NotBlank
     private AccountType accountType;
 }

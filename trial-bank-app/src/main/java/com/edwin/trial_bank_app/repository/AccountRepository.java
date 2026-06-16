@@ -1,6 +1,6 @@
 package com.edwin.trial_bank_app.repository;
 
-import com.edwin.trial_bank_app.enums.AccountType;
+import com.edwin.trial_bank_app.entity.AccountType;
 import com.edwin.trial_bank_app.entity.Account;
 import com.edwin.trial_bank_app.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;

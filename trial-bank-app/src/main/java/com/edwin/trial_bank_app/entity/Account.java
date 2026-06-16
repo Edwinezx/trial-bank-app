@@ -1,7 +1,6 @@
 package com.edwin.trial_bank_app.entity;
 
 import com.edwin.trial_bank_app.enums.AccountStatus;
-import com.edwin.trial_bank_app.enums.AccountType;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
@@ -50,9 +49,6 @@ public class Account extends BaseEntity {
     private BigDecimal interest;
 
     @Enumerated(EnumType.STRING)
-    private AccountType accountType;
-
-    @Enumerated(EnumType.STRING)
     @Column(length = 25)
     private AccountStatus status;
 
@@ -62,4 +58,8 @@ public class Account extends BaseEntity {
     @JoinColumn(name = "user_id")
     @OnDelete(action = OnDeleteAction.CASCADE)
     private User user;
+
+    @ManyToOne
+    @JoinColumn(name = "account_type_id")
+    private AccountType accountType;
 }

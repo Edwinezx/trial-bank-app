@@ -1,7 +1,6 @@
 package com.edwin.trial_bank_app.dto;
 
-import com.edwin.trial_bank_app.enums.AccountType;
-import jakarta.validation.constraints.NotNull;
+import com.edwin.trial_bank_app.entity.AccountType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -16,8 +15,7 @@ import java.math.BigDecimal;
 public class AccountInfo {
 
     private String accountName;
-    @NotNull
     private BigDecimal availableBalance;
     private String accountNumber;
-    private AccountType accountType;
+    private String accountType;
 }
