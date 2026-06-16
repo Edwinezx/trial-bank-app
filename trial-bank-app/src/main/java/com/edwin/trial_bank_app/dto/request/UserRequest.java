@@ -1,6 +1,5 @@
 package com.edwin.trial_bank_app.dto.request;
 
-import com.edwin.trial_bank_app.entity.AccountType;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
@@ -51,6 +50,6 @@ public class UserRequest{
     private String accountNumber;
     private BigDecimal availableBalance;
 
-    @NotBlank
-    private AccountType accountType;
+    @NotBlank(message = "Account Type Cannot Be Left Blank")
+    private String accountType;
 }

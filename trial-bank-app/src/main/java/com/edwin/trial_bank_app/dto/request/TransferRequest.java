@@ -22,7 +22,7 @@ public class TransferRequest {
     @NotBlank(message = "Destination account is required")
     private String destinationAccountNumber;
 
-    @NotBlank(message = "Amount is required")
+    @NotNull(message = "Amount is required")
     @Positive(message = "Amount must be greater than 0")
     private BigDecimal amount;
 

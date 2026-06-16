@@ -1,6 +1,5 @@
 package com.edwin.trial_bank_app.dto;
 
-import com.edwin.trial_bank_app.entity.AccountType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

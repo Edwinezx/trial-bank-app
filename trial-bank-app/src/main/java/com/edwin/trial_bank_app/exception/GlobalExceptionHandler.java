@@ -1,12 +1,14 @@
 package com.edwin.trial_bank_app.exception;
 
 import com.edwin.trial_bank_app.dto.response.ErrorResponse;
+import com.edwin.trial_bank_app.dto.response.ErrorResponseDto;
 import com.edwin.trial_bank_app.dto.response.ValidationErrorResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.context.request.WebRequest;
 
 import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
@@ -19,6 +21,12 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleAccountNotFound(AccountNotFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(error("404", ex.getMessage()));
+    }
+
+    @ExceptionHandler(AccountTypeNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleAccountTypeNotFound(AccountTypeNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(error("019", ex.getMessage()));
     }
 
     @ExceptionHandler(InsufficientFundsException.class)
@@ -98,9 +106,11 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponse> handleGeneral(Exception ex) {
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(error("500", "An unexpected error occurred. Please contact support."));
+    public ResponseEntity<ErrorResponseDto> handleGeneral(Exception exception, WebRequest webRequest) {
+        ErrorResponseDto errorResponseDto = new ErrorResponseDto(
+                webRequest.getDescription(false), HttpStatus.INTERNAL_SERVER_ERROR,
+                exception.getMessage(), LocalDateTime.now());
+        return new ResponseEntity<>(errorResponseDto, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     private ErrorResponse error(String code, String message) {

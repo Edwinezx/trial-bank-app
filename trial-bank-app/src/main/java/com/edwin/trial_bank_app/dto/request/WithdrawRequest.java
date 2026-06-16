@@ -19,7 +19,7 @@ public class WithdrawRequest {
     @NotBlank(message = "Source account is required")
     private String sourceAccountNumber;
 
-    @NotBlank(message = "Amount is required")
+    @NotNull(message = "Amount is required")
     @Positive(message = "Amount must be greater than 0")
     private BigDecimal amount;
 }

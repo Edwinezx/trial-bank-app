@@ -10,6 +10,7 @@ import com.edwin.trial_bank_app.enums.AccountStatus;
 import com.edwin.trial_bank_app.entity.AccountType;
 import com.edwin.trial_bank_app.enums.Roles;
 import com.edwin.trial_bank_app.exception.AccountNotFoundException;
+import com.edwin.trial_bank_app.exception.AccountTypeNotFoundException;
 import com.edwin.trial_bank_app.repository.AccountRepository;
 import com.edwin.trial_bank_app.repository.AccountTypeRepository;
 import com.edwin.trial_bank_app.repository.UserRepository;
@@ -36,7 +37,11 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public BankResponse registerAccount(UserRequest userRequest) {
-        AccountType accountType = userRequest.getAccountType();
+        AccountType accountType = accountTypeRepository
+                .findByTypeNameIgnoreCase(userRequest.getAccountType())
+                .orElseThrow(() -> new AccountTypeNotFoundException(
+                        "Unknown account type: " + userRequest.getAccountType()));
+
         User foundUser = userRepository.findByEmail(userRequest.getEmail());
         User savedUser;
 
@@ -65,10 +70,10 @@ public class AccountServiceImpl implements AccountService {
                     .build());
         }
 
-        String accountNumber = switch (accountType.getTypeName()) {
+        String accountNumber = switch (accountType.getTypeName().toUpperCase()) {
             case "SAVINGS" -> AccountUtils.generateSavingsAccountNumber();
             case "CURRENT" -> AccountUtils.generateCurrentAccountNumber();
-            case "FIXED"   -> AccountUtils.generateFixedAccountNumber();
+            case "FIXED DEPOSIT" -> AccountUtils.generateFixedAccountNumber();
             default -> throw new IllegalStateException("Unexpected value: " + accountType.getTypeName());
         };
 
@@ -85,9 +90,9 @@ public class AccountServiceImpl implements AccountService {
                 "Account " + accountNumber + " created", accountNumber);
 
         sendEmail(savedUser.getEmail(), "ACCOUNT CREATION",
-                "Your " + accountType + " account has been created.\n" +
-                "Account Number: " + savedAccount.getAccountNumber() + "\n" +
-                "Name: " + savedUser.getLastName() + " " + savedUser.getFirstName());
+                "Your " + accountType.getTypeName() + " account has been created.\n" +
+                        "Account Number: " + savedAccount.getAccountNumber() + "\n" +
+                        "Name: " + savedUser.getLastName() + " " + savedUser.getFirstName());
 
         return BankResponse.builder()
                 .responseCode(AccountUtils.ACCOUNT_CREATION_SUCCESS)
