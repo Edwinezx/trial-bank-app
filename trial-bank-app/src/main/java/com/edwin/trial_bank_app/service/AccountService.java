@@ -1,10 +1,10 @@
 package com.edwin.trial_bank_app.service;
 
-import com.edwin.trial_bank_app.dto.request.UserRequest;
+import com.edwin.trial_bank_app.dto.request.NewAccountRequest;
 import com.edwin.trial_bank_app.dto.response.BankResponse;
 
 public interface AccountService {
-    BankResponse registerAccount(UserRequest userRequest);
+    BankResponse createAccount(NewAccountRequest newAccountRequest);
     BankResponse closeAccount(String accountNumber);
     BankResponse freezeAccount(String accountNumber);
     BankResponse unfreezeAccount(String accountNumber);

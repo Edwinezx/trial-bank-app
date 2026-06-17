@@ -2,6 +2,7 @@ package com.edwin.trial_bank_app.service.impl;
 
 import com.edwin.trial_bank_app.dto.AccountInfo;
 import com.edwin.trial_bank_app.dto.EmailDetails;
+import com.edwin.trial_bank_app.dto.request.NewAccountRequest;
 import com.edwin.trial_bank_app.dto.request.UserRequest;
 import com.edwin.trial_bank_app.dto.response.BankResponse;
 import com.edwin.trial_bank_app.entity.Account;
@@ -29,76 +30,19 @@ import java.math.BigDecimal;
 public class AccountServiceImpl implements AccountService {
 
     private final UserRepository userRepository;
+    private final AccountTypeRepository accountTypeRepository;
     private final AccountRepository accountRepository;
-    private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
     private final AuditService auditService;
-    private final AccountTypeRepository accountTypeRepository;
+
+    /*AccountType accountType = accountTypeRepository
+            .findByTypeNameIgnoreCase(newAccountRequest.getAccountType())
+            .orElseThrow(() -> new AccountTypeNotFoundException(
+                    "Unknown account type: " + newAccountRequest.getAccountType()));*/
 
     @Override
-    public BankResponse registerAccount(UserRequest userRequest) {
-        AccountType accountType = accountTypeRepository
-                .findByTypeNameIgnoreCase(userRequest.getAccountType())
-                .orElseThrow(() -> new AccountTypeNotFoundException(
-                        "Unknown account type: " + userRequest.getAccountType()));
+    public BankResponse createAccount(NewAccountRequest newAccountRequest) {
 
-        User foundUser = userRepository.findByEmail(userRequest.getEmail());
-        User savedUser;
-
-        if (foundUser != null) {
-            if (accountRepository.existsByUserAndAccountType(foundUser, accountType)) {
-                return BankResponse.builder()
-                        .responseCode(AccountUtils.ACCOUNT_EXISTS_CODE)
-                        .responseMessage(AccountUtils.ACCOUNT_EXISTS_MSG)
-                        .build();
-            }
-            savedUser = foundUser;
-
-        } else {
-            savedUser = userRepository.save(User.builder()
-                    .firstName(userRequest.getFirstName())
-                    .lastName(userRequest.getLastName())
-                    .otherName(userRequest.getOtherName())
-                    .gender(userRequest.getGender())
-                    .address(userRequest.getAddress())
-                    .stateOfOrigin(userRequest.getStateOfOrigin())
-                    .email(userRequest.getEmail())
-                    .phoneNumber(userRequest.getPhoneNumber())
-                    .alternativePhoneNumber(userRequest.getAlternativePhoneNumber())
-                    .password(passwordEncoder.encode(userRequest.getPassword()))
-                    .role(Roles.ROLE_USER)
-                    .build());
-        }
-
-        String accountNumber = switch (accountType.getTypeName().toUpperCase()) {
-            case "SAVINGS" -> AccountUtils.generateSavingsAccountNumber();
-            case "CURRENT" -> AccountUtils.generateCurrentAccountNumber();
-            case "FIXED DEPOSIT" -> AccountUtils.generateFixedAccountNumber();
-            default -> throw new IllegalStateException("Unexpected value: " + accountType.getTypeName());
-        };
-
-        Account savedAccount = accountRepository.save(Account.builder()
-                .accountNumber(accountNumber)
-                .availableBalance(BigDecimal.ZERO)
-                .ledgerBalance(BigDecimal.ZERO)
-                .accountType(accountType)
-                .status(AccountStatus.ACTIVE)
-                .user(savedUser)
-                .build());
-
-        auditService.log("ACCOUNT_CREATED", savedUser.getEmail(), "SUCCESS",
-                "Account " + accountNumber + " created", accountNumber);
-
-        sendEmail(savedUser.getEmail(), "ACCOUNT CREATION",
-                "Your " + accountType.getTypeName() + " account has been created.\n" +
-                        "Account Number: " + savedAccount.getAccountNumber() + "\n" +
-                        "Name: " + savedUser.getLastName() + " " + savedUser.getFirstName());
-
-        return BankResponse.builder()
-                .responseCode(AccountUtils.ACCOUNT_CREATION_SUCCESS)
-                .responseMessage(AccountUtils.ACCOUNT_CREATION_MSG)
-                .accountInfo(toAccountInfo(savedAccount))
-                .build();
     }
 
     @Override

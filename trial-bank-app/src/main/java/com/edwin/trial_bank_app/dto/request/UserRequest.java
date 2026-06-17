@@ -47,9 +47,5 @@ public class UserRequest{
 
     @NotBlank
     private String role;
-    private String accountNumber;
-    private BigDecimal availableBalance;
 
-    @NotBlank(message = "Account Type Cannot Be Left Blank")
-    private String accountType;
 }

@@ -1,7 +1,7 @@
 package com.edwin.trial_bank_app.exception;
 
 import com.edwin.trial_bank_app.dto.response.ErrorResponse;
-import com.edwin.trial_bank_app.dto.response.ErrorResponseDto;
+import com.edwin.trial_bank_app.dto.response.GeneralErrorResponseDto;
 import com.edwin.trial_bank_app.dto.response.ValidationErrorResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -106,8 +106,8 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponseDto> handleGeneral(Exception exception, WebRequest webRequest) {
-        ErrorResponseDto errorResponseDto = new ErrorResponseDto(
+    public ResponseEntity<GeneralErrorResponseDto> handleGeneral(Exception exception, WebRequest webRequest) {
+        GeneralErrorResponseDto errorResponseDto = new GeneralErrorResponseDto(
                 webRequest.getDescription(false), HttpStatus.INTERNAL_SERVER_ERROR,
                 exception.getMessage(), LocalDateTime.now());
         return new ResponseEntity<>(errorResponseDto, HttpStatus.INTERNAL_SERVER_ERROR);

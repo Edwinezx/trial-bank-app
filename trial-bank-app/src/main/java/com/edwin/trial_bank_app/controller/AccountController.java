@@ -17,7 +17,7 @@ public class AccountController {
 
     @PostMapping("/register")
     public ResponseEntity<BankResponse> createAccount(@Valid @RequestBody UserRequest request) {
-        return ResponseEntity.ok(accountService.registerAccount(request));
+        return ResponseEntity.ok(accountService.onboardNewUser(request));
     }
 
     @PatchMapping("/close/{accountNumber}")
