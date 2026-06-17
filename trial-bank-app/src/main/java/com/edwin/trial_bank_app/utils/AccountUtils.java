@@ -7,13 +7,9 @@ import java.util.concurrent.ThreadLocalRandom;
 public class AccountUtils {
 
 
-    public static final String ACCOUNT_CREATION_SUCCESS = "002";
+    public static final String USER_REGISTRATION_SUCCESS = "002";
 
     public static final String ACCOUNT_CREATION_MSG = "Account Created Successfully";
-
-    public static final String ACCOUNT_DOES_NOT_EXIST = "003";
-
-    public static final String ACCOUNT_DOES_NOT_EXIST_MSG = "Account Does Not Exist";
 
     public static final String ACCOUNT_FOUND_CODE = "004";
 

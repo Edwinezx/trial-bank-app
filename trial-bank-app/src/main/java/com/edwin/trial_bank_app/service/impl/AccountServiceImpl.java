@@ -73,7 +73,7 @@ public class AccountServiceImpl implements AccountService {
                         "Account Number: " + savedAccount.getAccountNumber() + "\n" +
                         "Name: " + user.getLastName() + " " + user.getFirstName());
 
-        return successResponse(AccountUtils.ACCOUNT_CREATION_SUCCESS,
+        return successResponse("201",
                 AccountUtils.ACCOUNT_CREATION_MSG, savedAccount);
     }
 

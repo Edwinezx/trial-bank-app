@@ -5,6 +5,7 @@ import com.edwin.trial_bank_app.dto.request.UserRequest;
 import com.edwin.trial_bank_app.dto.response.BankResponse;
 import com.edwin.trial_bank_app.entity.User;
 import com.edwin.trial_bank_app.enums.Roles;
+import com.edwin.trial_bank_app.exception.UserExistsException;
 import com.edwin.trial_bank_app.repository.UserRepository;
 import com.edwin.trial_bank_app.service.AuditService;
 import com.edwin.trial_bank_app.service.EmailService;
@@ -27,10 +28,7 @@ public class UserServiceImpl implements UserServices {
     public BankResponse onboardNewUser(UserRequest userRequest) {
 
         if (userRepository.existsByEmail(userRequest.getEmail())) {
-            return BankResponse.builder()
-                    .responseCode(AccountUtils.ACCOUNT_EXISTS_CODE)
-                    .responseMessage("A user with this email already exists")
-                    .build();
+            throw new UserExistsException("User with this email already exists!");
         }
 
         User savedUser = userRepository.save(User.builder()
@@ -55,7 +53,7 @@ public class UserServiceImpl implements UserServices {
                         "You can now open an account.");
 
         return BankResponse.builder()
-                .responseCode(AccountUtils.ACCOUNT_CREATION_SUCCESS)
+                .responseCode(AccountUtils.USER_REGISTRATION_SUCCESS)
                 .responseMessage("User registered successfully")
                 .build();
     }
