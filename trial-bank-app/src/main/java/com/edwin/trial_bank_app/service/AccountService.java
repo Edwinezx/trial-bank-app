@@ -4,7 +4,7 @@ import com.edwin.trial_bank_app.dto.request.NewAccountRequest;
 import com.edwin.trial_bank_app.dto.response.BankResponse;
 
 public interface AccountService {
-    BankResponse createAccount(NewAccountRequest newAccountRequest);
+    BankResponse createAccount(NewAccountRequest newAccountRequest, String userEmail);
     BankResponse closeAccount(String accountNumber);
     BankResponse freezeAccount(String accountNumber);
     BankResponse unfreezeAccount(String accountNumber);

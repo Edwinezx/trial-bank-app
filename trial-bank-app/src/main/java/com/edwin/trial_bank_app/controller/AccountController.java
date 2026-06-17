@@ -1,23 +1,25 @@
 package com.edwin.trial_bank_app.controller;
 
-import com.edwin.trial_bank_app.dto.request.UserRequest;
+import com.edwin.trial_bank_app.dto.request.NewAccountRequest;
 import com.edwin.trial_bank_app.dto.response.BankResponse;
 import com.edwin.trial_bank_app.service.AccountService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/user")
+@RequestMapping("/api/account")
 @RequiredArgsConstructor
 public class AccountController {
 
     private final AccountService accountService;
 
-    @PostMapping("/register")
-    public ResponseEntity<BankResponse> createAccount(@Valid @RequestBody UserRequest request) {
-        return ResponseEntity.ok(accountService.onboardNewUser(request));
+    @PostMapping("/open")
+    public ResponseEntity<BankResponse> createAccount(@Valid @RequestBody NewAccountRequest request,
+                                                      Authentication authentication) {
+        return ResponseEntity.ok(accountService.createAccount(request, authentication.getName()));
     }
 
     @PatchMapping("/close/{accountNumber}")
