@@ -16,10 +16,10 @@ import java.math.BigDecimal;
 @Builder
 public class TransferRequest {
 
-    @NotBlank(message = "Source account is required")
+    @NotNull(message = "Source account is required")
     private String sourceAccountNumber;
 
-    @NotBlank(message = "Destination account is required")
+    @NotNull(message = "Destination account is required")
     private String destinationAccountNumber;
 
     @NotNull(message = "Amount is required")

@@ -1,8 +1,8 @@
 package com.edwin.trial_bank_app.dto.request;
 
+import com.edwin.trial_bank_app.validation.ValidPhoneNumber;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -32,13 +32,11 @@ public class UserRequest{
     @Email
     private String email;
 
-    @NotBlank
-    @Pattern(regexp = "^[0-9]{11}$",
-            message ="Invalid Phone number format")
+    @NotBlank(message = "Phone Number Cannot Be Left Blank")
+    @ValidPhoneNumber(message = "Invalid Nigerian Phone Number")
     private String phoneNumber;
 
-    @Pattern(regexp = "^[0-9]{11}$",
-            message ="Invalid Phone number format")
+    @ValidPhoneNumber(optional = true, message = "Invalid Nigerian Phone Number")
     private String alternativePhoneNumber;
 
     @NotBlank

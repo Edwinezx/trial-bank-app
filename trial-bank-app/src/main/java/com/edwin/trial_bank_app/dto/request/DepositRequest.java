@@ -1,6 +1,6 @@
 package com.edwin.trial_bank_app.dto.request;
 
-import jakarta.validation.constraints.NotBlank;
+
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
@@ -16,7 +16,7 @@ import java.math.BigDecimal;
 @Builder
 public class DepositRequest {
 
-    @NotBlank(message = "destination account is required")
+    @NotNull(message = "destination account is required")
     private String destinationAccountNumber;
 
     @NotNull(message = "Amount is required")
