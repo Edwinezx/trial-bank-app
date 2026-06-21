@@ -5,7 +5,6 @@ import com.edwin.trial_bank_app.dto.request.UserRequest;
 import com.edwin.trial_bank_app.dto.response.BankResponse;
 import com.edwin.trial_bank_app.entity.User;
 import com.edwin.trial_bank_app.enums.Roles;
-import com.edwin.trial_bank_app.exception.UserExistsException;
 import com.edwin.trial_bank_app.repository.UserRepository;
 import com.edwin.trial_bank_app.service.AuditService;
 import com.edwin.trial_bank_app.service.EmailService;
@@ -28,7 +27,10 @@ public class UserServiceImpl implements UserServices {
     public BankResponse onboardNewUser(UserRequest userRequest) {
 
         if (userRepository.existsByEmail(userRequest.getEmail())) {
-            throw new UserExistsException("User with this email already exists!");
+            return BankResponse.builder()
+                    .responseCode(AccountUtils.ACCOUNT_EXISTS_CODE)
+                    .responseMessage("A user with this email already exists")
+                    .build();
         }
 
         User savedUser = userRepository.save(User.builder()
@@ -48,21 +50,21 @@ public class UserServiceImpl implements UserServices {
         auditService.log("USER_ONBOARDED", savedUser.getEmail(), "SUCCESS",
                 "New user registered");
 
-        sendEmail(savedUser.getEmail(),
+        sendEmail(savedUser.getEmail(), "WELCOME",
                 "Hi " + savedUser.getFirstName() + ", your registration was successful. " +
                         "You can now open an account.");
 
         return BankResponse.builder()
-                .responseCode(AccountUtils.USER_REGISTRATION_SUCCESS)
+                .responseCode(AccountUtils.ACCOUNT_CREATION_SUCCESS)
                 .responseMessage("User registered successfully")
                 .build();
     }
 
-    private void sendEmail(String email, String body) {
+    private void sendEmail(String email, String subject, String body) {
         if (email != null && !email.isBlank()) {
             emailService.sendEmailAlert(EmailDetails.builder()
                     .recipientEmail(email)
-                    .subject("WELCOME")
+                    .subject(subject)
                     .messageBody(body)
                     .build());
         }

@@ -17,20 +17,6 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(UserExistsException.class)
-    public ResponseEntity<ErrorResponse> handleUserExistsException(UserExistsException ex) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(error("400", "User with this email already exists!")
-        );
-    }
-
-    @ExceptionHandler(UserDoesNotExistException.class)
-    public ResponseEntity<ErrorResponse> handleUserDoesNotExistException(UserExistsException ex) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(error("400", ex.getMessage())
-                );
-    }
-
     @ExceptionHandler(AccountNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleAccountNotFound(AccountNotFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
@@ -40,7 +26,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(AccountTypeNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleAccountTypeNotFound(AccountTypeNotFoundException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(error("400", ex.getMessage()));
+                .body(error("019", ex.getMessage()));
     }
 
     @ExceptionHandler(InsufficientFundsException.class)

@@ -2,25 +2,32 @@ package com.edwin.trial_bank_app.service.impl;
 
 import com.edwin.trial_bank_app.dto.request.DepositRequest;
 import com.edwin.trial_bank_app.entity.Account;
+import com.edwin.trial_bank_app.entity.Transaction;
 import com.edwin.trial_bank_app.enums.TransactionStatus;
 import com.edwin.trial_bank_app.enums.TransactionType;
+import com.edwin.trial_bank_app.event.DepositCompletedEvent;
+import com.edwin.trial_bank_app.event.DepositFailedEvent;
 import com.edwin.trial_bank_app.exception.AccountNotFoundException;
 import com.edwin.trial_bank_app.repository.AccountRepository;
-import com.edwin.trial_bank_app.service.*;
+import com.edwin.trial_bank_app.service.AccountValidationService;
+import com.edwin.trial_bank_app.service.DepositService;
+import com.edwin.trial_bank_app.service.TransactionRecordService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
 public class DepositServiceImpl implements DepositService {
 
-    private final AccountRepository        accountRepository;
-    private final AccountValidationService validationService;
-    private final TransactionRecordService transactionRecordService;
-    private final AuditService             auditService;
+    private final AccountRepository         accountRepository;
+    private final AccountValidationService  validationService;
+    private final TransactionRecordService  transactionRecordService;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Override
     @Transactional
@@ -37,7 +44,7 @@ public class DepositServiceImpl implements DepositService {
             account.setAvailableBalance(account.getAvailableBalance().add(amount));
             accountRepository.save(account);
 
-            transactionRecordService.recordTransaction(
+            Transaction transaction = transactionRecordService.recordTransaction(
                     null,
                     account.getAccountNumber(),
                     amount,
@@ -46,14 +53,23 @@ public class DepositServiceImpl implements DepositService {
                     TransactionStatus.SUCCESS
             );
 
-            // REQUIRES_NEW in AuditServiceImpl — persists even if main tx rolls back
-            auditService.log("DEPOSIT", account.getUser().getEmail(), "SUCCESS",
-                    "Deposited ₦" + amount, account.getAccountNumber());
+            eventPublisher.publishEvent(new DepositCompletedEvent(
+                    transaction.getTransactionReference(),
+                    account.getAccountNumber(),
+                    account.getUser().getEmail(),
+                    amount,
+                    account.getAvailableBalance(),
+                    LocalDateTime.now()
+            ));
 
         } catch (Exception ex) {
-            // REQUIRES_NEW — this persists even though the main tx will roll back
-            auditService.log("DEPOSIT", account.getUser().getEmail(), "FAILED",
-                    ex.getMessage(), account.getAccountNumber());
+            eventPublisher.publishEvent(new DepositFailedEvent(
+                    account.getAccountNumber(),
+                    account.getUser().getEmail(),
+                    amount,
+                    ex.getMessage(),
+                    LocalDateTime.now()
+            ));
             throw ex;
         }
     }

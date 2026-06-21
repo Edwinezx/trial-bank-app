@@ -18,7 +18,7 @@ public class AccountController {
 
     @PostMapping("/open")
     public ResponseEntity<BankResponse> createAccount(@Valid @RequestBody NewAccountRequest request,
-                                                      Authentication authentication) {
+                                                        Authentication authentication) {
         return ResponseEntity.ok(accountService.createAccount(request, authentication.getName()));
     }
 

@@ -2,26 +2,34 @@ package com.edwin.trial_bank_app.service.impl;
 
 import com.edwin.trial_bank_app.dto.request.WithdrawRequest;
 import com.edwin.trial_bank_app.entity.Account;
+import com.edwin.trial_bank_app.entity.Transaction;
 import com.edwin.trial_bank_app.enums.TransactionStatus;
 import com.edwin.trial_bank_app.enums.TransactionType;
+import com.edwin.trial_bank_app.event.WithdrawalCompletedEvent;
+import com.edwin.trial_bank_app.event.WithdrawalFailedEvent;
 import com.edwin.trial_bank_app.exception.AccountNotFoundException;
 import com.edwin.trial_bank_app.repository.AccountRepository;
-import com.edwin.trial_bank_app.service.*;
+import com.edwin.trial_bank_app.service.AccountValidationService;
+import com.edwin.trial_bank_app.service.FraudDetectionService;
+import com.edwin.trial_bank_app.service.TransactionRecordService;
+import com.edwin.trial_bank_app.service.WithdrawService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
 public class WithdrawServiceImpl implements WithdrawService {
 
-    private final AccountRepository        accountRepository;
-    private final AccountValidationService validationService;
-    private final FraudDetectionService    fraudDetectionService;
-    private final TransactionRecordService transactionRecordService;
-    private final AuditService             auditService;
+    private final AccountRepository         accountRepository;
+    private final AccountValidationService  validationService;
+    private final FraudDetectionService     fraudDetectionService;
+    private final TransactionRecordService  transactionRecordService;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Override
     @Transactional
@@ -40,7 +48,7 @@ public class WithdrawServiceImpl implements WithdrawService {
             account.setAvailableBalance(account.getAvailableBalance().subtract(amount));
             accountRepository.save(account);
 
-            transactionRecordService.recordTransaction(
+            Transaction transaction = transactionRecordService.recordTransaction(
                     account.getAccountNumber(),
                     null,
                     amount,
@@ -49,13 +57,23 @@ public class WithdrawServiceImpl implements WithdrawService {
                     TransactionStatus.SUCCESS
             );
 
-            auditService.log("WITHDRAWAL", account.getUser().getEmail(), "SUCCESS",
-                    "Withdrew ₦" + amount, account.getAccountNumber());
+            eventPublisher.publishEvent(new WithdrawalCompletedEvent(
+                    transaction.getTransactionReference(),
+                    account.getAccountNumber(),
+                    account.getUser().getEmail(),
+                    amount,
+                    account.getAvailableBalance(),
+                    LocalDateTime.now()
+            ));
 
         } catch (Exception ex) {
-            // REQUIRES_NEW — this persists even though the main tx will roll back
-            auditService.log("WITHDRAWAL", account.getUser().getEmail(), "FAILED",
-                    ex.getMessage(), account.getAccountNumber());
+            eventPublisher.publishEvent(new WithdrawalFailedEvent(
+                    account.getAccountNumber(),
+                    account.getUser().getEmail(),
+                    amount,
+                    ex.getMessage(),
+                    LocalDateTime.now()
+            ));
             throw ex;
         }
     }
