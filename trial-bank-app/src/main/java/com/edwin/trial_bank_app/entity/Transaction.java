@@ -15,10 +15,9 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "transactions",
         indexes = {
-                @Index(
-                        name = "idx_transaction_reference",
-                        columnList = "transactionReference"
-                )
+                @Index(name = "idx_transaction_reference",   columnList = "transactionReference"),
+                @Index(name = "idx_txn_source_created",      columnList = "sourceAccountNumber, createdAt"),
+                @Index(name = "idx_txn_destination_created", columnList = "destinationAccountNumber, createdAt")
         }
 )
 public class Transaction extends BaseEntity {
