@@ -59,6 +59,12 @@ public class GlobalExceptionHandler {
                 .body(error("401", ex.getMessage()));
     }
 
+    @ExceptionHandler(InvalidUsernameOrPasswordException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidCredentials(InvalidUsernameOrPasswordException ex) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(error("401", ex.getMessage()));
+    }
+
     @ExceptionHandler(InvalidAmountException.class)
     public ResponseEntity<ErrorResponse> handleInvalidAmount(InvalidAmountException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
@@ -100,7 +106,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(org.springframework.orm.ObjectOptimisticLockingFailureException.class)
-    public ResponseEntity<ErrorResponse> handleOptimisticLock(Exception ex) {
+    public ResponseEntity<ErrorResponse> handleOptimisticLock() {
         return ResponseEntity.status(HttpStatus.CONFLICT)
                 .body(error("409", "Transaction conflict detected. Please retry."));
     }
