@@ -18,38 +18,38 @@ public class AccountController {
     private final AccountService accountService;
 
     @PostMapping("/open")
-    @PreAuthorize("hasAnyRole('User','Admin')")
+    @PreAuthorize("hasAnyRole('ADMIN','USER')")
     public ResponseEntity<BankResponse> createAccount(@Valid @RequestBody NewAccountRequest request,
                                                         Authentication authentication) {
         return ResponseEntity.ok(accountService.createAccount(request, authentication.getName()));
     }
 
     @PatchMapping("/close/{accountNumber}")
-    @PreAuthorize("hasRole('Admin')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<BankResponse> closeAccount(@PathVariable String accountNumber) {
         return ResponseEntity.ok(accountService.closeAccount(accountNumber));
     }
 
     @PatchMapping("/freeze/{accountNumber}")
-    @PreAuthorize("hasRole('Admin')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<BankResponse> freezeAccount(@PathVariable String accountNumber) {
         return ResponseEntity.ok(accountService.freezeAccount(accountNumber));
     }
 
     @PatchMapping("/unfreeze/{accountNumber}")
-    @PreAuthorize("hasRole('Admin')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<BankResponse> unfreezeAccount(@PathVariable String accountNumber) {
         return ResponseEntity.ok(accountService.unfreezeAccount(accountNumber));
     }
 
     @PatchMapping("/dormant/{accountNumber}")
-    @PreAuthorize("hasRole('Admin')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<BankResponse> markDormant(@PathVariable String accountNumber) {
         return ResponseEntity.ok(accountService.markDormant(accountNumber));
     }
 
     @PatchMapping("/activate/{accountNumber}")
-    @PreAuthorize("hasRole('Admin')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<BankResponse> activateAccount(@PathVariable String accountNumber) {
         return ResponseEntity.ok(accountService.activateAccount(accountNumber));
     }
