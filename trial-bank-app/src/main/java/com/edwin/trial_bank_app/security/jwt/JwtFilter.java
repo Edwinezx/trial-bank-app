@@ -16,13 +16,31 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Set;
 
 @Component
 @RequiredArgsConstructor
 public class JwtFilter extends OncePerRequestFilter {
 
+    private static final Set<String> PUBLIC_PATHS = Set.of(
+            "/api/user/login",
+            "/api/user/register",
+            "/api/user/refresh",
+            "/swagger-ui.html"
+    );
+
     private final JwtUtils jwtUtils;
     private final TokenBlacklistService blacklistService;
+
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String path = request.getRequestURI();
+
+        return "OPTIONS".equalsIgnoreCase(request.getMethod())
+                || PUBLIC_PATHS.contains(path)
+                || path.startsWith("/swagger-ui/")
+                || path.startsWith("/v3/api-docs/");
+    }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
@@ -36,14 +54,14 @@ public class JwtFilter extends OncePerRequestFilter {
                 // Reject blacklisted tokens — without this check, logout is
                 // cosmetic only and the token remains usable until natural expiry
                 if (blacklistService.isBlacklisted(token)) {
-                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                    writeUnauthorized(response, "Token has been invalidated");
                     return;
                 }
 
                 // Reject refresh tokens used as access tokens — a refresh token
                 // should only ever reach /refresh, never any business endpoint
                 if (!jwtUtils.isAccessToken(token)) {
-                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                    writeUnauthorized(response, "An access token is required");
                     return;
                 }
 
@@ -62,11 +80,23 @@ public class JwtFilter extends OncePerRequestFilter {
             } catch (Exception e) {
                 // 401 not 403 — this is an authentication failure (bad/expired token),
                 // not an authorization failure (valid token, wrong permissions)
-                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                writeUnauthorized(response, "Invalid or expired access token");
                 return;
             }
         }
 
         filterChain.doFilter(request, response);
+    }
+
+    private void writeUnauthorized(
+            HttpServletResponse response,
+            String message
+    ) throws IOException {
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+        response.getWriter().write(
+                "{\"code\":\"401\",\"message\":\"" + message + "\"}"
+        );
     }
 }

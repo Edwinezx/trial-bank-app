@@ -9,6 +9,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -35,15 +36,28 @@ public class AccountValidationServiceImpl implements AccountValidationService {
 
     @Override
     public void validateOwnership(Account account) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth == null || !auth.isAuthenticated())
-            throw new UnauthorizedAccountAccessException();
+        Authentication authentication =
+                SecurityContextHolder.getContext().getAuthentication();
 
-        String loggedInEmail   = auth.getName();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new UnauthorizedAccountAccessException();
+        }
+
+        boolean isAdmin = authentication.getAuthorities()
+                .stream()
+                .anyMatch(authority ->
+                        Objects.equals(authority.getAuthority(), "ROLE_ADMIN"));
+
+        if (isAdmin) {
+            return;
+        }
+
+        String loggedInEmail = authentication.getName();
         String accountOwnerEmail = account.getUser().getEmail();
 
-        if (!accountOwnerEmail.equals(loggedInEmail))
+        if (!accountOwnerEmail.equalsIgnoreCase(loggedInEmail)) {
             throw new UnauthorizedAccountAccessException();
+        }
     }
 
     @Override

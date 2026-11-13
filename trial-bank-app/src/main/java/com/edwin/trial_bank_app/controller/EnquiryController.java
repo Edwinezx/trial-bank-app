@@ -20,13 +20,13 @@ public class EnquiryController {
     }
 
     @GetMapping("/balanceEnquiry")
-    @PreAuthorize("hasAnyRole('User','Admin')")
+    @PreAuthorize("hasAnyRole('USER','ADMIN')")
     public ResponseEntity<BankResponse> balanceEnquiry(@RequestParam String accountNumber) {
         return ResponseEntity.ok().body(enquiryService.balanceEnquiryByAccountNumber(accountNumber));
     }
 
     @GetMapping("/nameEnquiry")
-    @PreAuthorize("hasAnyRole('User','Admin')")
+    @PreAuthorize("hasAnyRole('USER','ADMIN')")
     public ResponseEntity<String> nameEnquiry(@RequestParam String accountNumber) {
         return ResponseEntity.ok().body(enquiryService.nameEnquiryByAccountNumber(accountNumber));
     }

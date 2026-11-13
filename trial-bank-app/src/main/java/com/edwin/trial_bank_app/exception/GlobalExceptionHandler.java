@@ -55,8 +55,16 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(UnauthorizedAccountAccessException.class)
     public ResponseEntity<ErrorResponse> handleUnauthorized(UnauthorizedAccountAccessException ex) {
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body(error("401", ex.getMessage()));
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(error("403", ex.getMessage()));
+    }
+
+    @ExceptionHandler(org.springframework.security.access.AccessDeniedException.class)
+    public ResponseEntity<ErrorResponse> handleAccessDenied(
+            org.springframework.security.access.AccessDeniedException ex
+    ) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(error("403", "You do not have permission to access this resource"));
     }
 
     @ExceptionHandler(InvalidUsernameOrPasswordException.class)

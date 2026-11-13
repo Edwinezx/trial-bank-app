@@ -6,6 +6,7 @@ import com.edwin.trial_bank_app.entity.Account;
 import com.edwin.trial_bank_app.entity.User;
 import com.edwin.trial_bank_app.exception.AccountNotFoundException;
 import com.edwin.trial_bank_app.repository.AccountRepository;
+import com.edwin.trial_bank_app.service.AccountValidationService;
 import com.edwin.trial_bank_app.service.EnquiryService;
 import com.edwin.trial_bank_app.utils.AccountUtils;
 import org.springframework.stereotype.Service;
@@ -14,15 +15,20 @@ import org.springframework.stereotype.Service;
 public class EnquiryServiceImpl implements EnquiryService {
 
     private final AccountRepository accountRepository;
+    private final AccountValidationService accountValidationService;
 
-    public EnquiryServiceImpl(AccountRepository accountRepository) {
+    public EnquiryServiceImpl(AccountRepository accountRepository, AccountValidationService accountValidationService) {
         this.accountRepository = accountRepository;
+        this.accountValidationService = accountValidationService;
     }
 
     @Override
     public BankResponse balanceEnquiryByAccountNumber(String accountNumber) {
         Account foundAccount = accountRepository.findByAccountNumber(accountNumber)
-                .orElseThrow(() -> new AccountNotFoundException("Account not Found"));
+                .orElseThrow(() ->
+                        new AccountNotFoundException("Account not found"));
+
+        accountValidationService.validateOwnership(foundAccount);
 
         User foundUser = foundAccount.getUser();
         return BankResponse.builder()
