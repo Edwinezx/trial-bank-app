@@ -61,4 +61,6 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
           AND t.createdAt >= :since
         """)
     long countRecentDebits(@Param("acct") String accountNumber, @Param("since") LocalDateTime since);
+
+    Optional<Transaction> findByIdempotencyKey(String idempotencyKey);
 }

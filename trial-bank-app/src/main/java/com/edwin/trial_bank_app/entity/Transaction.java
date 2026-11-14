@@ -57,6 +57,9 @@ public class Transaction extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private TransactionChannel channel;
 
+    @Column(name = "idempotency_key", unique = true, length = 100)
+    private String idempotencyKey;
+
 
 }
 

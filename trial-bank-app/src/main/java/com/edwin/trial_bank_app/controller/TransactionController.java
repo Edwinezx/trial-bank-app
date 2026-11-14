@@ -27,12 +27,15 @@ public class TransactionController {
 
     @PostMapping("/transfer")
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
-    public ResponseEntity<TransferResponse> transfer(@Valid @RequestBody TransferRequest request) {
-        return ResponseEntity.ok(transferService.transferFunds(request));
+    public ResponseEntity<TransferResponse> transfer(
+            @RequestHeader(value = "Idempotency-Key", required = false) String idempotencyKey,
+            @Valid @RequestBody TransferRequest request) {
+        return ResponseEntity.ok(transferService.transferFunds(request, idempotencyKey)
+        );
     }
 
     @PostMapping("/deposit")
-    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<String> deposit(@Valid @RequestBody DepositRequest request) {
         depositService.depositMoney(request);
         return ResponseEntity.ok("Deposit successful");

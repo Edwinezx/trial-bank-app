@@ -28,7 +28,7 @@ public class EnquiryServiceImpl implements EnquiryService {
                 .orElseThrow(() ->
                         new AccountNotFoundException("Account not found"));
 
-        accountValidationService.validateOwnership(foundAccount);
+        accountValidationService.validateOwnershipOrAdmin(foundAccount);
 
         User foundUser = foundAccount.getUser();
         return BankResponse.builder()

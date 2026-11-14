@@ -22,4 +22,8 @@ public interface AccountValidationService {
     void validateOwnership(
             Account account
     );
+
+    void validateOwnershipOrAdmin(
+            Account account
+    );
 }
