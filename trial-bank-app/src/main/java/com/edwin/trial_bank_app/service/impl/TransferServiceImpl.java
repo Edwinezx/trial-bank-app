@@ -9,6 +9,8 @@ import com.edwin.trial_bank_app.enums.TransactionType;
 import com.edwin.trial_bank_app.event.TransferCompletedEvent;
 import com.edwin.trial_bank_app.event.TransferFailedEvent;
 import com.edwin.trial_bank_app.exception.AccountNotFoundException;
+import com.edwin.trial_bank_app.exception.DuplicateTransactionException;
+import com.edwin.trial_bank_app.exception.InvalidIdempotencyKeyException;
 import com.edwin.trial_bank_app.repository.AccountRepository;
 import com.edwin.trial_bank_app.service.AccountValidationService;
 import com.edwin.trial_bank_app.service.FraudDetectionService;
@@ -21,15 +23,8 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Objects;
 
-/**
- * Orchestrates a transfer between two accounts.
-
- * Auditing and notifications are NOT called directly from here.
- * Instead this service publishes TransferCompletedEvent / TransferFailedEvent
- * and lets listeners (AuditEventListener, TransferNotificationListener) react.
- * See those classes for why AFTER_COMMIT / AFTER_ROLLBACK phases matter.
- */
 @Service
 @RequiredArgsConstructor
 public class TransferServiceImpl implements TransferService {
@@ -42,7 +37,17 @@ public class TransferServiceImpl implements TransferService {
 
     @Transactional
     @Override
-    public TransferResponse transferFunds(TransferRequest request) {
+    public TransferResponse transferFunds(TransferRequest request, String idempotencyKey) {
+        String normalizedKey = normalizeIdempotencyKey(idempotencyKey);
+
+        Transaction existingTransaction = transactionRecordService
+                .findByIdempotencyKey(normalizedKey)
+                .orElse(null);
+
+        if (existingTransaction != null) {
+            return handleRepeatedRequest(request, existingTransaction, normalizedKey);
+        }
+
         Account source = accountRepository.findByAccountNumber(request.getSourceAccountNumber())
                 .orElseThrow(() -> new AccountNotFoundException("Source account not found"));
 
@@ -66,7 +71,8 @@ public class TransferServiceImpl implements TransferService {
                     amount,
                     request.getNarration(),
                     TransactionType.TRANSFER,
-                    TransactionStatus.SUCCESS
+                    TransactionStatus.SUCCESS,
+                    normalizedKey
             );
 
             // Published now, delivered to listeners only AFTER this transaction commits.
@@ -82,14 +88,7 @@ public class TransferServiceImpl implements TransferService {
                     LocalDateTime.now()
             ));
 
-            return new TransferResponse(
-                    transaction.getTransactionReference(),
-                    source.getAccountNumber(),
-                    destination.getAccountNumber(),
-                    amount,
-                    TransactionStatus.SUCCESS,
-                    transaction.getCreatedAt()
-            );
+            return toTransferResponse(transaction);
 
         } catch (Exception ex) {
             // The @Transactional method is about to roll back, so there will be no
@@ -105,5 +104,76 @@ public class TransferServiceImpl implements TransferService {
             ));
             throw ex;
         }
+    }
+
+    private String normalizeIdempotencyKey(String key) {
+        if (key == null || key.isBlank()) {
+            throw new InvalidIdempotencyKeyException(
+                    "Idempotency-Key header is required"
+            );
+        }
+
+        String normalizedKey = key.trim();
+
+        if (normalizedKey.length() > 100) {
+            throw new InvalidIdempotencyKeyException(
+                    "Idempotency-Key must not exceed 100 characters"
+            );
+        }
+
+        return normalizedKey;
+    }
+
+    private TransferResponse handleRepeatedRequest(
+            TransferRequest request,
+            Transaction existingTransaction,
+            String idempotencyKey
+    ) {
+        Account originalSource = accountRepository
+                .findByAccountNumber(existingTransaction.getSourceAccountNumber())
+                .orElseThrow(() -> new AccountNotFoundException("Source account not found"));
+
+        validationService.validateOwnership(originalSource);
+
+        if (!sameTransfer(existingTransaction, request)) {
+            throw new DuplicateTransactionException(idempotencyKey);
+        }
+
+        return toTransferResponse(existingTransaction);
+    }
+
+    private boolean sameTransfer(
+            Transaction transaction,
+            TransferRequest request
+    ) {
+        boolean sameAmount = transaction.getAmount() != null
+                && request.getAmount() != null
+                && transaction.getAmount().compareTo(request.getAmount()) == 0;
+
+        return Objects.equals(
+                        transaction.getSourceAccountNumber(),
+                        request.getSourceAccountNumber()
+                )
+                && Objects.equals(
+                        transaction.getDestinationAccountNumber(),
+                        request.getDestinationAccountNumber()
+                )
+                && sameAmount
+                && Objects.equals(
+                        transaction.getNarration(),
+                        request.getNarration()
+                )
+                && transaction.getTransactionType() == TransactionType.TRANSFER;
+    }
+
+    private TransferResponse toTransferResponse(Transaction transaction) {
+        return TransferResponse.builder()
+                .transactionReference(transaction.getTransactionReference())
+                .sourceAccount(transaction.getSourceAccountNumber())
+                .destinationAccount(transaction.getDestinationAccountNumber())
+                .amount(transaction.getAmount())
+                .status(transaction.getStatus())
+                .timestamp(transaction.getCreatedAt())
+                .build();
     }
 }

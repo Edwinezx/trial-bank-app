@@ -91,6 +91,14 @@ public class GlobalExceptionHandler {
                 .body(error("409", ex.getMessage()));
     }
 
+    @ExceptionHandler(InvalidIdempotencyKeyException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidIdempotencyKey(
+            InvalidIdempotencyKeyException ex
+    ) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(error("400", ex.getMessage()));
+    }
+
     @ExceptionHandler(FraudSuspectedException.class)
     public ResponseEntity<ErrorResponse> handleFraud(FraudSuspectedException ex) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN)
