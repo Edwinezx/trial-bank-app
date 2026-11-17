@@ -4,12 +4,14 @@ import com.edwin.trial_bank_app.entity.Account;
 import com.edwin.trial_bank_app.exception.*;
 import com.edwin.trial_bank_app.service.AccountValidationService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AccountValidationServiceImpl implements AccountValidationService {
@@ -35,15 +37,27 @@ public class AccountValidationServiceImpl implements AccountValidationService {
 
     @Override
     public void validateOwnership(Account account) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth == null || !auth.isAuthenticated())
-            throw new UnauthorizedAccountAccessException();
+        Authentication authentication = getAuthentication();
 
-        String loggedInEmail   = auth.getName();
+        String loggedInEmail = authentication.getName();
         String accountOwnerEmail = account.getUser().getEmail();
 
-        if (!accountOwnerEmail.equals(loggedInEmail))
+        if (!accountOwnerEmail.equalsIgnoreCase(loggedInEmail)) {
             throw new UnauthorizedAccountAccessException();
+        }
+    }
+
+    @Override
+    public void validateOwnershipOrAdmin(Account account) {
+        Authentication authentication = getAuthentication();
+
+        boolean isAdmin = authentication.getAuthorities().stream()
+                .anyMatch(authority ->
+                        authority.getAuthority().equals("ROLE_ADMIN"));
+
+        if (!isAdmin) {
+            validateOwnership(account);
+        }
     }
 
     @Override
@@ -68,5 +82,16 @@ public class AccountValidationServiceImpl implements AccountValidationService {
             case DORMANT -> throw new DormantAccountException(account.getAccountNumber());
             case ACTIVE  -> { /* ok */ }
         }
+    }
+
+    private Authentication getAuthentication() {
+        Authentication authentication =
+                SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new UnauthorizedAccountAccessException();
+        }
+
+        return authentication;
     }
 }
