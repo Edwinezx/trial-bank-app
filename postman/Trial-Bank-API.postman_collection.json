@@ -1,0 +1,688 @@
+{
+  "info": {
+    "_postman_id": "61f2ad02-f7c7-4b92-8a89-30a67435fe65",
+    "name": "Trial Bank API",
+    "description": "Complete collection for the Trial Bank Spring Boot API. Run the Customer Journey folder in order to register a fresh user, authenticate, open savings and current accounts, fund the savings account, withdraw, transfer, and inspect transaction history. Admin requests require an existing ROLE_ADMIN user. Tokens and newly created account numbers are captured automatically.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{accessToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "event": [
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "pm.test('Response time is below 5 seconds', function () {",
+          "    pm.expect(pm.response.responseTime).to.be.below(5000);",
+          "});"
+        ]
+      }
+    }
+  ],
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8080", "type": "string" },
+    { "key": "userEmail", "value": "", "type": "string" },
+    { "key": "userPassword", "value": "PortfolioPass123!", "type": "string" },
+    { "key": "userPhone", "value": "", "type": "string" },
+    { "key": "alternativePhone", "value": "", "type": "string" },
+    { "key": "adminEmail", "value": "", "type": "string" },
+    { "key": "adminPassword", "value": "", "type": "string" },
+    { "key": "accessToken", "value": "", "type": "string" },
+    { "key": "refreshToken", "value": "", "type": "string" },
+    { "key": "adminToken", "value": "", "type": "string" },
+    { "key": "savingsAccountNumber", "value": "", "type": "string" },
+    { "key": "currentAccountNumber", "value": "", "type": "string" },
+    { "key": "lifecycleAccountNumber", "value": "", "type": "string" },
+    { "key": "idempotencyKey", "value": "", "type": "string" },
+    { "key": "transactionReference", "value": "", "type": "string" }
+  ],
+  "item": [
+    {
+      "name": "1. Customer Journey",
+      "description": "Run this folder in order. Registration generates a unique email and Nigerian phone numbers, while later requests reuse the captured values.",
+      "item": [
+        {
+          "name": "Register Customer",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const stamp = Date.now().toString();",
+                  "const suffix = stamp.slice(-8);",
+                  "pm.collectionVariables.set('userEmail', `portfolio.${stamp}@example.com`);",
+                  "pm.collectionVariables.set('userPhone', `+23480${suffix}`);",
+                  "pm.collectionVariables.set('alternativePhone', `+23481${suffix}`);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Customer is registered', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Registration response is JSON', function () {",
+                  "    pm.response.to.be.json;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Edwin\",\n  \"lastName\": \"Portfolio\",\n  \"otherName\": \"Demo\",\n  \"gender\": \"Male\",\n  \"address\": \"Lagos, Nigeria\",\n  \"stateOfOrigin\": \"Lagos\",\n  \"email\": \"{{userEmail}}\",\n  \"phoneNumber\": \"{{userPhone}}\",\n  \"alternativePhoneNumber\": \"{{alternativePhone}}\",\n  \"password\": \"{{userPassword}}\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/user/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "user", "register"]
+            },
+            "description": "Creates a new ROLE_USER customer. The pre-request script generates unique identity fields for repeatable collection runs."
+          }
+        },
+        {
+          "name": "Login Customer",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Login succeeds', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "const body = pm.response.json();",
+                  "pm.expect(body.token, 'access token').to.be.a('string').and.not.empty;",
+                  "pm.expect(body.refreshToken, 'refresh token').to.be.a('string').and.not.empty;",
+                  "pm.collectionVariables.set('accessToken', body.token);",
+                  "pm.collectionVariables.set('refreshToken', body.refreshToken);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"{{userEmail}}\",\n  \"password\": \"{{userPassword}}\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/user/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "user", "login"]
+            },
+            "description": "Authenticates the generated customer and stores accessToken and refreshToken."
+          }
+        },
+        {
+          "name": "Open Savings Account",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Savings account request succeeds', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "const body = pm.response.json();",
+                  "if (body.accountInfo && body.accountInfo.accountNumber) {",
+                  "    pm.collectionVariables.set('savingsAccountNumber', body.accountInfo.accountNumber);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"accountType\": \"SAVINGS\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/account/open",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "account", "open"]
+            }
+          }
+        },
+        {
+          "name": "Open Current Account",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Current account request succeeds', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "const body = pm.response.json();",
+                  "if (body.accountInfo && body.accountInfo.accountNumber) {",
+                  "    pm.collectionVariables.set('currentAccountNumber', body.accountInfo.accountNumber);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"accountType\": \"CURRENT\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/account/open",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "account", "open"]
+            }
+          }
+        },
+        {
+          "name": "Deposit into Savings",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Deposit succeeds', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    pm.expect(pm.response.text()).to.include('Deposit successful');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"destinationAccountNumber\": \"{{savingsAccountNumber}}\",\n  \"amount\": 250000.00\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/user/deposit",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "user", "deposit"]
+            }
+          }
+        },
+        {
+          "name": "Savings Balance Enquiry",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Balance enquiry succeeds', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    pm.response.to.be.json;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/user/balanceEnquiry?accountNumber={{savingsAccountNumber}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "user", "balanceEnquiry"],
+              "query": [
+                { "key": "accountNumber", "value": "{{savingsAccountNumber}}" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Current Account Name Enquiry",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Name enquiry succeeds', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    pm.expect(pm.response.text()).not.to.be.empty;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/user/nameEnquiry?accountNumber={{currentAccountNumber}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "user", "nameEnquiry"],
+              "query": [
+                { "key": "accountNumber", "value": "{{currentAccountNumber}}" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Withdraw from Savings",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Withdrawal succeeds', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    pm.expect(pm.response.text()).to.include('Withdrawal successful');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sourceAccountNumber\": \"{{savingsAccountNumber}}\",\n  \"amount\": 5000.00\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/user/withdraw",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "user", "withdraw"]
+            }
+          }
+        },
+        {
+          "name": "Transfer Savings to Current",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (!pm.collectionVariables.get('idempotencyKey')) {",
+                  "    pm.collectionVariables.set('idempotencyKey', pm.variables.replaceIn('{{$guid}}'));",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Transfer succeeds', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "const body = pm.response.json();",
+                  "pm.expect(body.status).to.eql('SUCCESS');",
+                  "if (body.transactionReference) {",
+                  "    pm.collectionVariables.set('transactionReference', body.transactionReference);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Idempotency-Key", "value": "{{idempotencyKey}}", "type": "text" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sourceAccountNumber\": \"{{savingsAccountNumber}}\",\n  \"destinationAccountNumber\": \"{{currentAccountNumber}}\",\n  \"amount\": 10000.00,\n  \"narration\": \"Portfolio demonstration transfer\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/user/transfer",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "user", "transfer"]
+            }
+          }
+        },
+        {
+          "name": "Savings Transaction History",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('History is paginated', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body.transactions).to.be.an('array');",
+                  "    pm.expect(body.page).to.eql(0);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/user/history/{{savingsAccountNumber}}?page=0&size=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "user", "history", "{{savingsAccountNumber}}"],
+              "query": [
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "20" }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Token Lifecycle",
+      "item": [
+        {
+          "name": "Refresh Access Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Access token is refreshed', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "const body = pm.response.json();",
+                  "pm.expect(body.token).to.be.a('string').and.not.empty;",
+                  "pm.collectionVariables.set('accessToken', body.token);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{refreshToken}}", "type": "string" }
+              ]
+            },
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/user/refresh",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "user", "refresh"]
+            }
+          }
+        },
+        {
+          "name": "Logout",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Logout succeeds', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.collectionVariables.unset('accessToken');",
+                  "pm.collectionVariables.unset('refreshToken');"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "X-Refresh-Token", "value": "{{refreshToken}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/user/logout",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "user", "logout"]
+            },
+            "description": "Run last. It blacklists both tokens and clears them from collection variables."
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Administration",
+      "description": "Set adminEmail and adminPassword to a database user whose role is ROLE_ADMIN, then run Admin Login before the lifecycle requests. Set lifecycleAccountNumber to the account you want to manage.",
+      "item": [
+        {
+          "name": "Admin Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Admin login succeeds', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "const body = pm.response.json();",
+                  "pm.expect(body.token).to.be.a('string').and.not.empty;",
+                  "pm.collectionVariables.set('adminToken', body.token);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"{{adminEmail}}\",\n  \"password\": \"{{adminPassword}}\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/user/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "user", "login"]
+            }
+          }
+        },
+        {
+          "name": "Freeze Account",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{adminToken}}", "type": "string" }] },
+            "method": "PATCH",
+            "url": {
+              "raw": "{{baseUrl}}/api/account/freeze/{{lifecycleAccountNumber}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "account", "freeze", "{{lifecycleAccountNumber}}"]
+            }
+          }
+        },
+        {
+          "name": "Unfreeze Account",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{adminToken}}", "type": "string" }] },
+            "method": "PATCH",
+            "url": {
+              "raw": "{{baseUrl}}/api/account/unfreeze/{{lifecycleAccountNumber}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "account", "unfreeze", "{{lifecycleAccountNumber}}"]
+            }
+          }
+        },
+        {
+          "name": "Mark Account Dormant",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{adminToken}}", "type": "string" }] },
+            "method": "PATCH",
+            "url": {
+              "raw": "{{baseUrl}}/api/account/dormant/{{lifecycleAccountNumber}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "account", "dormant", "{{lifecycleAccountNumber}}"]
+            }
+          }
+        },
+        {
+          "name": "Activate Account",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{adminToken}}", "type": "string" }] },
+            "method": "PATCH",
+            "url": {
+              "raw": "{{baseUrl}}/api/account/activate/{{lifecycleAccountNumber}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "account", "activate", "{{lifecycleAccountNumber}}"]
+            }
+          }
+        },
+        {
+          "name": "Close Account",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{adminToken}}", "type": "string" }] },
+            "method": "PATCH",
+            "url": {
+              "raw": "{{baseUrl}}/api/account/close/{{lifecycleAccountNumber}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "account", "close", "{{lifecycleAccountNumber}}"]
+            },
+            "description": "Destructive lifecycle transition for the selected account. Run only after other lifecycle demonstrations."
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Validation and Security Examples",
+      "item": [
+        {
+          "name": "Login with Invalid Password",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Invalid credentials return 401', function () {",
+                  "    pm.response.to.have.status(401);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"{{userEmail}}\",\n  \"password\": \"incorrect-password\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/user/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "user", "login"]
+            }
+          }
+        },
+        {
+          "name": "Transfer with Invalid Amount",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Invalid amount returns 400', function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Idempotency-Key", "value": "{{$guid}}", "type": "text" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sourceAccountNumber\": \"{{savingsAccountNumber}}\",\n  \"destinationAccountNumber\": \"{{currentAccountNumber}}\",\n  \"amount\": -100.00,\n  \"narration\": \"Invalid amount demonstration\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/user/transfer",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "user", "transfer"]
+            }
+          }
+        },
+        {
+          "name": "Protected Endpoint without Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Missing token is rejected', function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([401, 403]);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/user/balanceEnquiry?accountNumber={{savingsAccountNumber}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "user", "balanceEnquiry"],
+              "query": [{ "key": "accountNumber", "value": "{{savingsAccountNumber}}" }]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
